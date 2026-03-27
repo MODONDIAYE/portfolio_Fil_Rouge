@@ -1,0 +1,81 @@
+/* Configuration globale */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Arial, sans-serif;
+    background-color: #f5f5f5; /* Couleur de fond de la page */
+}
+
+/* Container principal de la barre de navigation */
+.navbar {
+    background-color: #2911b4; /* Teinte sombre prune/noir */
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 40px;
+    height: 85px;
+    color: white;
+}
+
+/* Section de gauche : Logo + Ligne */
+.logo-section {
+    display: flex;
+    align-items: center;
+    flex-grow: 1; /* Prend l'espace disponible */
+}
+
+.logo {
+    font-size: 22px;
+    font-weight: 800;
+    letter-spacing: 3px;
+    margin-right: 25px;
+    text-transform: uppercase;
+}
+
+.decorative-line {
+    height: 1px;
+    background-color: rgba(32, 45, 238, 0.2);
+    flex-grow: 1; /* S'étire entre le logo et le menu */
+    margin-right: 40px;
+}
+
+/* Section du milieu : Liens de navigation */
+.nav-links {
+    display: flex;
+    align-items: center;
+    gap: 25px;
+}
+
+.nav-links a {
+    color: rgba(255, 255, 255, 0.8);
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    transition: all 0.3s ease;
+}
+
+/* Effet au survol */
+.nav-links a:hover {
+    color: white;
+}
+
+/* Style pour l'élément actif (encadré "About") */
+.nav-links a.active {
+    border: 1px solid white;
+    padding: 8px 16px;
+    color: white;
+}
+
+/* Petite ligne de finition à l'extrême droite */
+.end-line {
+    width: 60px;
+    height: 1px;
+    background-color: rgba(32, 45, 238, 0.2);
+    margin-left: 25px;
+}
