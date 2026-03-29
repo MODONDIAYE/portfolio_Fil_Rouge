@@ -1,1 +1,0 @@
-# Task: Link 'Liste projets' to liste_projets.html - COMPLETED ✅\n\n## Steps:\n- [x] 1. Create this TODO.md\n- [x] 2. Edit HTML/index.html: Replace href=\"#liste_projets.\" → href=\"liste_projets.html\"\n- [x] 3. Update TODO.md with completion status\n- [ ] 4. Test link (open index.html in browser, click nav)\n- [ ] 5. Complete task
