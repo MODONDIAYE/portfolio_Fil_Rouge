@@ -3,6 +3,7 @@
     background: #0827ae;
     padding: 15px;
     display: flex;
+    justify-content: center;
     gap: 20px;
 }
 
@@ -36,6 +37,27 @@
 
 
 /* Conteneur principal */
+
+#list_AddProject {
+    margin-top: -45px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    /* margin-bottom: 30px; */
+    background-color: #8ab4e2;
+}
+
+#list_AddProject button {
+    padding: 10px 20px;
+    background: #07284a;
+    color: white;
+    border: none;
+    margin-right: 20px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: bold;
+    transition:  0.2s ease;
+}
 .content {
     max-width: 1000px;
     margin: 40px auto;
@@ -122,6 +144,8 @@
 .btn-details:hover {
     background: #0056b3;
 }
+
+
 
 /* Bouton Supprimer */
 .btn-delete {
