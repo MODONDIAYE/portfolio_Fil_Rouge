@@ -105,76 +105,60 @@ header {
     margin-bottom: 10px;
 }
 
-/* Email style */
-.email-box {
-    background: var(--primary-light);
-    padding: 15px;
-    border-radius: var(--radius);
-    display: inline-block;
-    margin-top: 10px;
-    font-weight: 600;
-    color: var(--primary);
+
+
+
+
+
+
+
+.formulaire {
+    max-width: 400px;          /* largeur limitée pour un rendu compact */
+    margin: 40px auto;         /* centré horizontalement */
+    padding: 20px;
+    background: #f9f9f9;       /* fond léger */
+    border: 1px solid #ddd;    /* bordure discrète */
+    border-radius: 8px;        /* coins arrondis */
+    font-family: Arial, sans-serif;
 }
 
-
-:root {
-    --primary: #0827ae;
-    --primary-light: #e8ecff;
-    --text-dark: #1a1a1a;
-    --text-light: #555;
-    --white: #fff;
-    --radius: 10px;
-    --shadow: 0 4px 12px rgba(0,0,0,0.1);
+.formulaire label {
+    display: block;            /* chaque label sur sa propre ligne */
+    margin-bottom: 6px;        /* espace sous le label */
+    font-weight: bold;         /* texte en gras */
+    color: 33;               /* couleur sombre pour lisibilité */
 }
 
-.contact-form {
-    max-width: 500px;
-    margin: 60px auto;
-    padding: 30px;
-    background: var(--white);
-    border-radius: var(--radius);
-    box-shadow: var(--shadow);
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-}
-
-.contact-form label {
-    font-weight: 600;
-    color: var(--text-dark);
-}
-
-.contact-form input,
-.contact-form textarea {
-    padding: 12px;
+.formulaire input,
+.formulaire textarea {
+    width: 100%;               /* occupe toute la largeur */
+    padding: 10px;
+    margin-bottom: 15px;       /* espace entre les champs */
     border: 1px solid #ccc;
-    border-radius: var(--radius);
-    font-size: 1rem;
-    transition: 0.3s;
+    border-radius: 5px;
+    font-size: 14px;
+    box-sizing: border-box;    /* inclut padding dans la largeur */
 }
 
-.contact-form input:focus,
-.contact-form textarea:focus {
-    border-color: var(--primary);
-    background: var(--primary-light);
-    outline: none;
+.formulaire textarea {
+    min-height: 100px;         /* hauteur par défaut */
+    resize: vertical;          /* redimensionnement vertical seulement */
 }
 
-.contact-form button {
-    background: var(--primary);
-    color: var(--white);
-    padding: 12px;
+.formulaire button {
+    background-color: var(--primary); /* vert agréable */
+    color: white;
+    padding: 10px 20px;
     border: none;
-    border-radius: var(--radius);
-    font-size: 1.1rem;
+    border-radius: 5px;
     cursor: pointer;
-    transition: 0.3s;
+    font-size: 15px;
+    transition: background-color 0.3s ease;
 }
 
-.contact-form button:hover {
-    opacity: 0.9;
+.formulaire button:hover {
+    background-color: #45a049; /* effet au survol */
 }
-
 
 
 

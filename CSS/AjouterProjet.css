@@ -45,7 +45,7 @@
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #dcdcdc 0%, #5d39ea 100%);
+            background: linear-gradient(135deg, #735cb5 0%, #210397 100%);
             min-height: 100vh;
             padding: 20px;
         }
@@ -159,3 +159,54 @@
                 padding: 30px 20px;
             }
         }
+
+
+
+
+/* last elements */
+
+
+.project-form {
+    max-width: 500px;
+    margin: 40px auto;
+    padding: 20px;
+    background: #fdfdfd;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-family: Arial, sans-serif;
+}
+
+.project-form label {
+    display: block;            /* chaque label sur sa propre ligne */
+    margin-bottom: 6px;
+    font-weight: bold;
+    color: #444;
+}
+
+.project-form input[type="file"],
+.project-form input[type="text"],
+.project-form input[type="url"],
+.project-form input[type="date"] {
+    width: 100%;               /* occupe toute la largeur */
+    padding: 10px;
+    margin-bottom: 18px;       /* espace entre les champs */
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 14px;
+    box-sizing: border-box;
+    transition: border-color 0.3s ease;
+}
+
+.project-form input:focus {
+    border-color: #4CAF50;     /* couleur verte au focus */
+    outline: none;
+}
+
+.project-form input[type="file"] {
+    padding: 6px;              /* plus compact pour le champ fichier */
+}
+
+.project-form input::placeholder {
+    color: #999;
+    font-style: italic;
+}
