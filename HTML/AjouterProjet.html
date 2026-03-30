@@ -18,14 +18,27 @@
 <main class="content">
     <h2>Ajouter un projet</h2>
 
-    <form>
+    <form class="project-form">
+
         <label>Nom du projet</label>
-        <input type="text" placeholder="Nom du projet">
+        <input type="text" placeholder="Ex : Plateforme E-commerce" required>
 
         <label>Description</label>
-        <textarea placeholder="Décrivez votre projet"></textarea>
+        <textarea placeholder="Décrivez votre projet..." required></textarea>
 
-        <button type="submit">Enregistrer</button>
+        <label>Image du projet</label>
+        <input type="file" accept="image/*">
+
+        <label>Technologies utilisées</label>
+        <input type="text" placeholder="Ex : HTML, CSS, JavaScript, React">
+
+        <label>Lien du projet (GitHub ou site)</label>
+        <input type="url" placeholder="https://">
+
+        <label>Date d’ajout</label>
+        <input type="date">
+
+        <button type="submit" class="btn-submit">Enregistrer</button>
     </form>
 </main>
 
