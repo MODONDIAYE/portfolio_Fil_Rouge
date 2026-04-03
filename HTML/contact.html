@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Contacts</title>
+    <link rel="stylesheet" href="../CSS/contact.css">
+</head>
+<body>
+
+<header>
+    <nav class="nav-menu">
+        <a href="./index.html">Accueil</a>
+        <a href="./liste_projets.html">Liste</a>
+        <a href="./AjouterProjet.html">Ajouter</a>
+    </nav>
+</header>
+
+<main class="content">
+    <h2>Contact</h2>
+    <p>Email : modou2243@gmail.com</p>
+    <p>Téléphone : +221 78 483 11 92</p>
+    <p>adresse : Dakar, Senegal</p>
+    
+    <div class="formulaire">
+    <form action="mailto:modou2243@gmail.com" method="post" enctype="text/plain">
+        <label for="name">Nom :</label> 
+        <input type="text" id="name" name="name" required><br>
+        <label for="email">Email :</label>
+        <input type="email" id="email" name="email" required><br>
+        <label for="message">Message :</label>
+        <textarea id="message" name="message" required></textarea> <br>
+        <button type="submit">Envoyer</button>
+    </form>
+    </div>
+</main>
+
+</body>
+</html>

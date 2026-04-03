@@ -1,0 +1,165 @@
+/* NAVIGATION */
+.nav-menu {
+    background: #0827ae;
+    padding: 15px;
+    display: flex;
+    gap: 20px;
+}
+
+.nav-menu a {
+    color: white;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+.nav-menu a:hover {
+    color: #ff9800;
+}
+
+/* HEADER */
+.header {
+    text-align: center;
+    padding: 60px 20px;
+    background: linear-gradient(to right, #333, #555);
+    color: white;
+}
+
+.subtitle-container {
+    margin-top: 10px;
+}
+
+.subtitle {
+    font-size: 1.1rem;
+    opacity: 0.9;
+}
+
+
+
+
+
+/* CONTENU PRINCIPAL */
+/* Palette */
+:root {
+    --primary: #0827ae;
+    --primary-light: #e8ecff;
+    --text-dark: #1a1a1a;
+    --text-light: #555;
+    --white: #fff;
+    --radius: 10px;
+    --shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+/* Reset */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: "Poppins", sans-serif;
+}
+
+/* Header */
+header {
+    background: var(--primary);
+    padding: 15px 0;
+    box-shadow: var(--shadow);
+}
+
+.nav-menu {
+    display: flex;
+    justify-content: center;
+    gap: 40px;
+}
+
+.nav-menu a {
+    color: var(--white);
+    text-decoration: none;
+    font-size: 1.1rem;
+    font-weight: 500;
+    transition: 0.3s;
+}
+
+.nav-menu a:hover {
+    opacity: 0.8;
+}
+
+/* Main content */
+.content {
+    max-width: 600px;
+    margin: 80px auto;
+    background: var(--white);
+    padding: 40px;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    text-align: center;
+}
+
+.content h2 {
+    color: var(--primary);
+    margin-bottom: 20px;
+    font-size: 2rem;
+}
+
+.content p {
+    color: var(--text-light);
+    font-size: 1.1rem;
+    margin-bottom: 10px;
+}
+
+
+
+
+
+
+
+
+.formulaire {
+    max-width: 400px;          /* largeur limitée pour un rendu compact */
+    margin: 40px auto;         /* centré horizontalement */
+    padding: 20px;
+    background: #f9f9f9;       /* fond léger */
+    border: 1px solid #ddd;    /* bordure discrète */
+    border-radius: 8px;        /* coins arrondis */
+    font-family: Arial, sans-serif;
+}
+
+.formulaire label {
+    display: block;            /* chaque label sur sa propre ligne */
+    margin-bottom: 6px;        /* espace sous le label */
+    font-weight: bold;         /* texte en gras */
+    color: 33;               /* couleur sombre pour lisibilité */
+}
+
+.formulaire input,
+.formulaire textarea {
+    width: 100%;               /* occupe toute la largeur */
+    padding: 10px;
+    margin-bottom: 15px;       /* espace entre les champs */
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 14px;
+    box-sizing: border-box;    /* inclut padding dans la largeur */
+}
+
+.formulaire textarea {
+    min-height: 100px;         /* hauteur par défaut */
+    resize: vertical;          /* redimensionnement vertical seulement */
+}
+
+.formulaire button {
+    background-color: var(--primary); /* vert agréable */
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 15px;
+    transition: background-color 0.3s ease;
+}
+
+.formulaire button:hover {
+    background-color: #45a049; /* effet au survol */
+}
+
+
+
+
