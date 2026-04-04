@@ -1,46 +1,30 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    <meta charset="UTF-8">
-    <title>Ajouter un projet</title>
-    <link rel="stylesheet" href="../CSS/AjouterProjet.css">
+<meta charset="UTF-8">
+<title>Ajouter un projet</title>
+<script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body>
+<body class="bg-gradient-to-br from-purple-900 via-purple-800 to-purple-950 min-h-screen text-gray-100">
 
-<header>
-    <nav class="nav-menu">
-        <a href="./index.html">Accueil</a>
-        <a href="./liste_projets.html">Liste</a>
-        <a href="./contact.html">Contacts</a>
+<!-- ================= HEADER ================= -->
+<header class="bg-purple-900 shadow-md">
+    <nav class="max-w-6xl mx-auto px-6 py-4 flex justify-between items-center">
+        <!-- Logo / Nom -->
+        <h1 class="text-xl font-bold text-yellow-400">Modou NDIAYE</h1>
+        <!-- Menu -->
+        <div class="flex gap-6">
+            <a href="./index.html" class="hover:text-yellow-400 transition">Accueil</a>
+            <a href="./liste_projets.html" class="hover:text-yellow-400 transition">Liste</a>
+            <a href="./contact.html" class="hover:text-yellow-400 transition">Contacts</a>
+        </div>
     </nav>
 </header>
 
-<main class="content">
-    <h2>Ajouter un projet</h2>
+<!-- ================= CONTENU ================= -->
+<main class="max-w-3xl mx-auto px-6 py-10">
 
-    <form class="project-form">
-
-        <label>Nom du projet</label>
-        <input type="text" placeholder="Ex : Plateforme E-commerce" required>
-
-        <label>Description</label>
-        <textarea placeholder="Décrivez votre projet..." required></textarea>
-
-        <label>Image du projet</label>
-        <input type="file" accept="image/*">
-
-        <label>Technologies utilisées</label>
-        <input type="text" placeholder="Ex : HTML, CSS, JavaScript, React">
-
-        <label>Lien du projet (GitHub ou site)</label>
-        <input type="url" placeholder="https://">
-
-        <label>Date d’ajout</label>
-        <input type="date">
-
-        <button type="submit" class="btn-submit">Enregistrer</button>
-    </form>
+    
 </main>
-
 </body>
 </html>
