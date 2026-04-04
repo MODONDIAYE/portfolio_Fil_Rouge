@@ -1,71 +1,35 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    <meta charset="UTF-8">
-    <title>Liste des projets</title>
-    <link rel="stylesheet" href="../CSS/liste_projets.css">
-</head>
-<body>
+<meta charset="UTF-8">
+<title>Liste des projets</title>
 
-<header>
-    <nav class="nav-menu">
-        <a href="./index.html">Accueil</a>
-        <a href="./AjouterProjet.html">Ajouter</a>
-        <a href="./contact.html">Contacts</a>
+<script src="https://cdn.tailwindcss.com"></script>
+
+</head>
+
+<body class="bg-blue-50 text-gray-800">
+
+<!-- ================= HEADER ================= -->
+<header class="bg-blue-900 shadow-md">
+    <nav class="max-w-6xl mx-auto px-6 py-4 flex justify-between items-center">
+
+        <h1 class="text-white text-xl font-bold">
+            <span class="text-yellow-400">Modou</span> NDIAYE
+        </h1>
+
+        <div class="flex gap-6">
+            <a href="./index.html" class="text-white hover:text-yellow-400 transition">Accueil</a>
+            <a href="./AjouterProjet.html" class="text-white hover:text-yellow-400 transition">Ajouter</a>
+            <a href="./contact.html" class="text-white hover:text-yellow-400 transition">Contacts</a>
+        </div>
     </nav>
 </header>
 
-<main class="content">
-    <div  id="list_AddProject">
-    <h2>Liste des projets</h2><button><a href="./AjouterProjet.html" style="color: white; text-decoration: none;">Ajouter un projet </a></button></div>
+<!-- ================= CONTENU ================= -->
+<main class="max-w-6xl mx-auto px-6 py-10">
 
-    <ul>
-        <!-- projet 1 -->
-        <li>
-            <p class="project-title">Projet 1 : Site web de portfolio</p>
-            <img src="../img/portfolio.jpg" alt="">
-            <p class="project-date">Ajouté le 5 octobre 2023</p>
-            <div class="project-actions">
-                <button class="btn-details" ation: none;"><a style="color: white ; text-decoration: none;" href="./voirdetailsP1.html">Voir details</a></button>
-                <button class="btn-delete">Supprimer</button>
-            </div>
-        </li>
-
-        <li>
-            <p class="project-title"> Projet 2 : Application  de gestion de tâches</p>
-             <img src="../img/concept-application-gestion-taches_23-2148625232.avif" alt="">
-            <p class="project-date">Ajouté le 15 septembre 2024</p>
-            <div class="project-actions">
-                <button class="btn-details" ation: none;"><a style="color: white ; text-decoration: none;" href="./voirdetailsP1.html">Voir details</a></button>
-                <button class="btn-delete">Supprimer</button>
-            </div>
-        </li>
-
-        <!-- projet 3 -->
-        <li>
-            <p class="project-title">Projet 3 : UI pour application de fitness</p>
-            <img src="../img/gradient-fitness-app-template_23-2151095461.avif" alt="">
-
-            <p class="project-date">Ajouté le 10 novembre 2025</p>
-            <div class="project-actions">
-                <button class="btn-details" ation: none;"><a style="color: white ; text-decoration: none;" href="./voirdetailsP1.html">Voir details</a></button>
-                <button class="btn-delete">Supprimer</button>
-            </div>
-        </li>
-
-        <!-- projet 4 -->
-                 <li>
-            <p class="project-title">Projet 1 : Site Application mobile</p>
-            <img src="../img/application-mobile-cashpay.jpg" alt="">
-            <p class="project-date">Ajouté le 5 octobre 2023</p>
-            <div class="project-actions">
-                <button class="btn-details" ation: none;"><a style="color: white ; text-decoration: none;" href="./voirdetailsP4.html">Voir details</a></button>
-                <button class="btn-delete"><a href=""></a>Supprimer</button>
-            </div>
-        </li>
-
-    </ul>
 </main>
-<!-- autre contenu -->
+
 </body>
 </html>
