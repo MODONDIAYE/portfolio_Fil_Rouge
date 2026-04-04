@@ -5,10 +5,9 @@
 <title>Ajouter un projet</title>
 <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-gradient-to-br from-purple-900 via-purple-800 to-purple-950 min-h-screen text-gray-100">
-
+<body class="bg-gradient-to-br from-blue-900 via-blue-800 to-blue-700 min-h-screen text-gray-100">
 <!-- ================= HEADER ================= -->
-<header class="bg-purple-900 shadow-md">
+<header class="bg-blue-900 shadow-md">
     <nav class="max-w-6xl mx-auto px-6 py-4 flex justify-between items-center">
         <!-- Logo / Nom -->
         <h1 class="text-xl font-bold text-yellow-400">Modou NDIAYE</h1>
@@ -24,51 +23,52 @@
 <!-- ================= CONTENU ================= -->
 <main class="max-w-3xl mx-auto px-6 py-10">
  <!-- TITRE -->
-    <h2 class="text-4xl font-extrabold text-center mb-10 text-white drop-shadow-lg">
+    <h2 class="text-4xl font-extrabold text-center mb-10 text-yellow-400 drop-shadow-lg">
         Ajouter un projet
     </h2>
       <!-- ================= FORMULAIRE ================= -->
-    <form class="bg-purple-950 bg-opacity-90 backdrop-blur-lg p-10 rounded-2xl shadow-xl space-y-6">
+    <form class="bg-blue-700 bg-opacity-90 backdrop-blur-lg p-10 rounded-2xl shadow-xl space-y-6">
 
         <!-- Nom du projet -->
         <div>
             <label class="block mb-2 font-semibold text-yellow-400">Nom du projet</label>
             <input type="text" placeholder="Ex : Plateforme E-commerce"
-                   class="w-full p-4 rounded-xl border-2 border-purple-700 focus:border-yellow-400 focus:ring-2 focus:ring-yellow-400 bg-purple-900 text-white placeholder-purple-300 transition"/>
+                   class="w-full p-4 rounded-xl border-2 border-black-700 focus:border-yellow-400 focus:ring-2 focus:ring-yellow-400 bg-white-900 text-black placeholder-text-gray-300transition"/>
         </div>
 
              <!-- Description -->
         <div>
             <label class="block mb-2 font-semibold text-yellow-400">Description</label>
             <textarea placeholder="Décrivez votre projet..."
-                      class="w-full p-4 rounded-xl border-2 border-purple-700 focus:border-yellow-400 focus:ring-2 focus:ring-yellow-400 bg-purple-900 text-white placeholder-purple-300 resize-y transition h-32"></textarea>
+                      class="w-full p-4 rounded-xl border-2 border-black-400 focus:border-yellow-400 focus:ring-2 focus:ring-yellow-400 bg-white-900 text-black placeholder-text-gray-300resize-y transition h-32"></textarea>
         </div>
 
         <!-- Image -->
         <div>
             <label class="block mb-2 font-semibold text-yellow-400">Image du projet</label>
             <input type="file" accept="image/*"
-                   class="w-full p-3 rounded-xl border-2 border-purple-700 focus:border-yellow-400 focus:ring-2 focus:ring-yellow-400 bg-purple-900 text-white placeholder-purple-300 transition"/>
+                   class="w-full p-3 rounded-xl border-2 border-none focus:border-yellow-700 focus:border-yellow-400 focus:ring-2 focus:ring-yellow-400 bg-white -900 text-white placeholder-purple-300 transition"/>
         </div>
+
            <!-- Technologies utilisées -->
         <div>
             <label class="block mb-2 font-semibold text-yellow-400">Technologies utilisées</label>
             <input type="text" placeholder="Ex : HTML, CSS, JavaScript, React"
-                   class="w-full p-4 rounded-xl border-2 border-purple-700 focus:border-yellow-400 focus:ring-2 focus:ring-yellow-400 bg-purple-900 text-white placeholder-purple-300 transition"/>
+                   class="w-full p-4 rounded-xl border-2 border-black-700 focus:border-yellow-400 focus:ring-2 focus:ring-yellow-400 bg-white-900 text-black placeholder-text-gray-300 transition"/>
         </div>
 
              <!-- Lien du projet -->
         <div>
             <label class="block mb-2 font-semibold text-yellow-400">Lien du projet (GitHub ou site)</label>
             <input type="url" placeholder="https://"
-                   class="w-full p-4 rounded-xl border-2 border-purple-700 focus:border-yellow-400 focus:ring-2 focus:ring-yellow-400 bg-purple-900 text-white placeholder-purple-300 transition"/>
+                   class="w-full p-4 rounded-xl border-2 border-black-700 focus:border-yellow-400 focus:ring-2 focus:ring-yellow-400 bg-white-900 text-black placeholder-text-gray-300 transition"/>
         </div>
 
          <!-- Date -->
         <div>
             <label class="block mb-2 font-semibold text-yellow-400">Date d’ajout</label>
             <input type="date"
-                   class="w-full p-4 rounded-xl border-2 border-purple-700 focus:border-yellow-400 focus:ring-2 focus:ring-yellow-400 bg-purple-900 text-white transition"/>
+                   class="w-full p-4 rounded-xl border-2 border-black-700 focus:border-yellow-400 focus:ring-2 focus:ring-yellow-400 bg-white-900 text-black placeholder-text-gray-300 transition"/>
         </div>
 
         <!-- Bouton de soumission -->
