@@ -3,36 +3,61 @@
 <head>
     <meta charset="UTF-8">
     <title>Contacts</title>
-    <link rel="stylesheet" href="../CSS/contact.css">
+    <script src="https://cdn.tailwindcss.com"></script> <!-- Tailwind CSS -->
 </head>
-<body>
+<body class="bg-gradient-to-br from-blue-900 via-blue-800 to-blue-700 min-h-screen text-gray-100">
 
-<header>
-    <nav class="nav-menu">
-        <a href="./index.html">Accueil</a>
-        <a href="./liste_projets.html">Liste</a>
-        <a href="./AjouterProjet.html">Ajouter</a>
-    </nav>
-</header>
+    <!-- HEADER / NAVIGATION -->
+    <header class="bg-blue-900 shadow-lg">
+        <nav class="flex justify-center gap-10 p-4">
+            <!-- Liens navigation -->
+            <a href="./index.html" class="text-white font-semibold hover:text-yellow-400 transition-colors">Accueil</a>
+            <a href="./liste_projets.html" class="text-white font-semibold hover:text-yellow-400 transition-colors">Liste</a>
+            <a href="./AjouterProjet.html" class="text-white font-semibold hover:text-yellow-400 transition-colors">Ajouter</a>
+        </nav>
+    </header>
 
-<main class="content">
-    <h2>Contact</h2>
-    <p>Email : modou2243@gmail.com</p>
-    <p>Téléphone : +221 78 483 11 92</p>
-    <p>adresse : Dakar, Senegal</p>
-    
-    <div class="formulaire">
-    <form action="mailto:modou2243@gmail.com" method="post" enctype="text/plain">
-        <label for="name">Nom :</label> 
-        <input type="text" id="name" name="name" required><br>
-        <label for="email">Email :</label>
-        <input type="email" id="email" name="email" required><br>
-        <label for="message">Message :</label>
-        <textarea id="message" name="message" required></textarea> <br>
-        <button type="submit">Envoyer</button>
-    </form>
-    </div>
-</main>
+    <!-- MAIN CONTENT -->
+    <main class="max-w-lg mx-auto mt-20 bg-white rounded-xl shadow-xl p-10">
+        <h2 class="text-3xl font-bold text-blue-900 mb-6 text-center">Contact</h2>
+
+        <!-- Informations de contact -->
+        <div class="mb-8 text-center space-y-2">
+            <p class="text-gray-700"><strong>Email :</strong> modou2243@gmail.com</p>
+            <p class="text-gray-700"><strong>Téléphone :</strong> +221 78 483 11 92</p>
+            <p class="text-gray-700"><strong>Adresse :</strong> Dakar, Sénégal</p>
+        </div>
+
+        <!-- FORMULAIRE -->
+        <form action="mailto:modou2243@gmail.com" method="post" enctype="text/plain" class="space-y-4">
+            <!-- Nom -->
+            <div>
+                <label for="name" class="block font-semibold text-blue-900 mb-1">Nom :</label>
+                <input type="text" id="name" name="name" required 
+                       class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-yellow-400 transition"/>
+            </div>
+
+            <!-- Email -->
+            <div>
+                <label for="email" class="block font-semibold text-blue-900 mb-1">Email :</label>
+                <input type="email" id="email" name="email" required
+                       class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-yellow-400 transition"/>
+            </div>
+
+            <!-- Message -->
+            <div>
+                <label for="message" class="block font-semibold text-blue-900 mb-1">Message :</label>
+                <textarea id="message" name="message" required
+                          class="w-full px-4 py-2 border rounded-lg min-h-[120px] focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-yellow-400 transition"></textarea>
+            </div>
+
+            <!-- Bouton envoyer -->
+            <button type="submit" 
+                    class="w-full bg-yellow-400 text-blue-900 font-bold py-3 rounded-lg hover:bg-yellow-300 transition transform hover:-translate-y-1 shadow-lg">
+                Envoyer
+            </button>
+        </form>
+    </main>
 
 </body>
 </html>
