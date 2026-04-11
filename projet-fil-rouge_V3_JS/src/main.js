@@ -590,3 +590,21 @@ function renderContact() {
         </div>
       </div>
     </section>`;
+
+
+      // Simulation envoi
+  document.getElementById('form-contact').addEventListener('submit', (e) => {
+    e.preventDefault();
+    const btn = document.getElementById('btn-contact-submit');
+    btn.textContent = 'Envoi en cours…';
+    btn.disabled = true;
+    setTimeout(() => {
+      import('./js/ui.js').then(({ showToast }) => {
+        showToast('Message envoyé avec succès ! Je vous répondrai rapidement.', 'success', 4000);
+      });
+      e.target.reset();
+      btn.textContent = 'Envoyer le message';
+      btn.disabled = false;
+    }, 1200);
+  });
+}
