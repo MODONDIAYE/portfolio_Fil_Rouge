@@ -505,3 +505,88 @@ function renderAjouter() {
 
   initFormulaireAjout();
 }
+
+
+// ─── Vue Contact ──────────────────────────────────────────────────────────────
+
+function renderContact() {
+  const app = document.getElementById('app');
+  app.innerHTML = `
+    <section class="min-h-screen bg-gradient-to-br from-[#0f1e3c] to-[#1a2f5a] py-16 px-6">
+      <div class="max-w-5xl mx-auto">
+
+        <div class="text-center mb-12 animate-fade-in-up">
+          <span class="inline-block bg-amber-400/20 text-amber-400 text-xs font-bold px-4 py-1.5 rounded-full mb-4 tracking-widest uppercase">
+            Restons en contact
+          </span>
+          <h2 class="text-4xl font-extrabold text-white">Me contacter</h2>
+          <p class="text-slate-300 mt-3 text-sm max-w-md mx-auto">
+            Vous avez un projet ou une opportunité ? N'hésitez pas à m'écrire.
+          </p>
+        </div>
+
+        <div class="grid md:grid-cols-5 gap-8">
+
+          <!-- INFOS -->
+          <div class="md:col-span-2 space-y-4 animate-fade-in-left">
+            ${[
+              { icon: '📧', label: 'Email',     value: 'm2243d@gmail.com' },
+              { icon: '📞', label: 'Téléphone', value: '+221 78 483 11 92' },
+              { icon: '📍', label: 'Localité',  value: 'Dakar, Sénégal' },
+            ].map(c => `
+              <div class="bg-white/10 backdrop-blur-sm rounded-2xl p-5 flex items-center gap-4">
+                <div class="text-2xl">${c.icon}</div>
+                <div>
+                  <p class="text-slate-400 text-xs">${c.label}</p>
+                  <p class="text-white font-semibold text-sm">${c.value}</p>
+                </div>
+              </div>
+            `).join('')}
+
+            <!-- Réseaux -->
+            <div class="bg-white/10 backdrop-blur-sm rounded-2xl p-5">
+              <p class="text-slate-400 text-xs mb-3">Réseaux sociaux</p>
+              <div class="flex gap-3">
+                ${[
+                  { label: 'GitHub',   href: '#' },
+                  { label: 'LinkedIn', href: '#' },
+                  { label: 'Twitter',  href: '#' },
+                ].map(r => `
+                  <a href="${r.href}" class="bg-white/20 text-white text-xs font-semibold px-3 py-2 rounded-xl hover:bg-amber-400 hover:text-slate-900 transition">
+                    ${r.label}
+                  </a>
+                `).join('')}
+              </div>
+            </div>
+          </div>
+
+          <!-- FORMULAIRE -->
+          <div class="md:col-span-3 animate-scale-in animate-delay-200">
+            <div class="bg-white rounded-3xl shadow-2xl p-8">
+              <form id="form-contact" class="space-y-5">
+                <div>
+                  <label class="block text-sm font-bold text-slate-700 mb-1.5">Nom</label>
+                  <input type="text" placeholder="Votre nom" class="form-input" required/>
+                </div>
+                <div>
+                  <label class="block text-sm font-bold text-slate-700 mb-1.5">Email</label>
+                  <input type="email" placeholder="votre@email.com" class="form-input" required/>
+                </div>
+                <div>
+                  <label class="block text-sm font-bold text-slate-700 mb-1.5">Sujet</label>
+                  <input type="text" placeholder="Objet de votre message" class="form-input"/>
+                </div>
+                <div>
+                  <label class="block text-sm font-bold text-slate-700 mb-1.5">Message</label>
+                  <textarea rows="5" placeholder="Votre message..." class="form-input resize-none" required></textarea>
+                </div>
+                <button type="submit" id="btn-contact-submit"
+                  class="w-full bg-[#0f1e3c] text-white font-bold py-3.5 rounded-xl hover:bg-amber-400 hover:text-slate-900 transition shadow-lg text-sm uppercase tracking-wider">
+                  Envoyer le message
+                </button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>`;
