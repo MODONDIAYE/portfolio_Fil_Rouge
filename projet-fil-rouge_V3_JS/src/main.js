@@ -296,3 +296,212 @@ function renderProjets() {
   initFiltresCategorie('filtres-categorie', 'grille-projets');
   initScrollAnimations();
 }
+
+
+// ─── Vue Ajouter 
+
+function renderAjouter() {
+  const app = document.getElementById('app');
+  app.innerHTML = `
+    <section class="min-h-screen bg-gradient-to-br from-[#0f1e3c] to-[#1a2f5a] py-14 px-6">
+      <div class="max-w-2xl mx-auto">
+
+        <div class="text-center mb-10 animate-fade-in-up">
+          <h2 class="text-4xl font-extrabold text-white">Ajouter un projet</h2>
+          <p class="text-slate-300 mt-2 text-sm">Renseignez les informations de votre nouveau projet</p>
+        </div>
+
+        <form id="formulaire-ajout-projet" class="bg-white rounded-3xl shadow-2xl p-8 md:p-10 space-y-6 animate-scale-in">
+
+          <!-- Nom -->
+          <div>
+            <label class="block text-sm font-bold text-slate-700 mb-1.5">
+              Nom du projet <span class="text-red-400">*</span>
+            </label>
+            <input id="projet-nom" type="text" placeholder="Ex : Plateforme E-commerce"
+              class="form-input"/>
+          </div>
+
+          <!-- Catégorie -->
+          <div>
+            <label class="block text-sm font-bold text-slate-700 mb-1.5">
+              Catégorie <span class="text-red-400">*</span>
+            </label>
+            <select id="projet-categorie" class="form-input">
+              <option value="">-- Choisir --</option>
+              <option>Web</option>
+              <option>App</option>
+              <option>UI/UX</option>
+              <option>Mobile</option>
+              <option>E-commerce</option>
+              <option>Santé</option>
+            </select>
+          </div>
+
+          <!-- Description -->
+          <div>
+            <label class="block text-sm font-bold text-slate-700 mb-1.5">
+              Description <span class="text-red-400">*</span>
+            </label>
+            <textarea id="projet-description" rows="4" placeholder="Décrivez votre projet..."
+              class="form-input resize-none"></textarea>
+          </div>
+
+          <!-- Technologies -->
+          <div>
+            <label class="block text-sm font-bold text-slate-700 mb-1.5">
+              Technologies <span class="text-red-400">*</span>
+            </label>
+            <input id="projet-technologies" type="text" placeholder="HTML, CSS, JavaScript, React"
+              class="form-input"/>
+            <p class="text-xs text-slate-400 mt-1">Séparez par des virgules</p>
+          </div>
+
+          <!-- Lien -->
+          <div>
+            <label class="block text-sm font-bold text-slate-700 mb-1.5">Lien (GitHub / site)</label>
+            <input id="projet-lien" type="url" placeholder="https://github.com/..."
+              class="form-input"/>
+          </div>
+
+          <!-- Date -->
+          <div>
+            <label class="block text-sm font-bold text-slate-700 mb-1.5">Date d'ajout</label>
+            <input id="projet-date" type="date" class="form-input"/>
+          </div>
+
+          <!-- Image -->
+          <div>
+            <label class="block text-sm font-bold text-slate-700 mb-1.5">Image du projet</label>
+            <div class="border-2 border-dashed border-slate-200 rounded-xl p-6 text-center hover:border-amber-400 transition cursor-pointer"
+              onclick="document.getElementById('projet-image').click()">
+              <svg class="w-8 h-8 text-slate-300 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                  d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+              </svg>
+              <p class="text-sm text-slate-400">Cliquez pour choisir une image</p>
+              <input id="projet-image" type="file" accept="image/*" class="hidden"/>
+            </div>
+            <img id="img-preview" class="hidden mt-4 w-full h-40 object-cover rounded-xl shadow"/>
+          </div>
+
+          <!-- Boutons -->
+          <div class="flex gap-3 pt-2">
+            <button type="submit"
+              class="flex-1 bg-amber-400 text-slate-900 font-extrabold py-3.5 rounded-xl hover:bg-amber-300 transition shadow-lg text-sm uppercase tracking-wider">
+              Enregistrer le projet
+            </button>
+            <a href="#projets"
+              class="flex items-center justify-center px-5 border-2 border-slate-200 text-slate-600 font-semibold rounded-xl hover:border-slate-300 transition text-sm">
+              Annuler
+            </a>
+          </div>
+        </form>
+      </div>
+    </section>`;
+
+  initFormulaireAjout();
+}
+
+function renderAjouter() {
+  const app = document.getElementById('app');
+  app.innerHTML = `
+    <section class="min-h-screen bg-gradient-to-br from-[#0f1e3c] to-[#1a2f5a] py-14 px-6">
+      <div class="max-w-2xl mx-auto">
+
+        <div class="text-center mb-10 animate-fade-in-up">
+          <h2 class="text-4xl font-extrabold text-white">Ajouter un projet</h2>
+          <p class="text-slate-300 mt-2 text-sm">Renseignez les informations de votre nouveau projet</p>
+        </div>
+
+        <form id="formulaire-ajout-projet" class="bg-white rounded-3xl shadow-2xl p-8 md:p-10 space-y-6 animate-scale-in">
+
+          <!-- Nom -->
+          <div>
+            <label class="block text-sm font-bold text-slate-700 mb-1.5">
+              Nom du projet <span class="text-red-400">*</span>
+            </label>
+            <input id="projet-nom" type="text" placeholder="Ex : Plateforme E-commerce"
+              class="form-input"/>
+          </div>
+
+          <!-- Catégorie -->
+          <div>
+            <label class="block text-sm font-bold text-slate-700 mb-1.5">
+              Catégorie <span class="text-red-400">*</span>
+            </label>
+            <select id="projet-categorie" class="form-input">
+              <option value="">-- Choisir --</option>
+              <option>Web</option>
+              <option>App</option>
+              <option>UI/UX</option>
+              <option>Mobile</option>
+              <option>E-commerce</option>
+              <option>Santé</option>
+            </select>
+          </div>
+
+          <!-- Description -->
+          <div>
+            <label class="block text-sm font-bold text-slate-700 mb-1.5">
+              Description <span class="text-red-400">*</span>
+            </label>
+            <textarea id="projet-description" rows="4" placeholder="Décrivez votre projet..."
+              class="form-input resize-none"></textarea>
+          </div>
+
+          <!-- Technologies -->
+          <div>
+            <label class="block text-sm font-bold text-slate-700 mb-1.5">
+              Technologies <span class="text-red-400">*</span>
+            </label>
+            <input id="projet-technologies" type="text" placeholder="HTML, CSS, JavaScript, React"
+              class="form-input"/>
+            <p class="text-xs text-slate-400 mt-1">Séparez par des virgules</p>
+          </div>
+
+          <!-- Lien -->
+          <div>
+            <label class="block text-sm font-bold text-slate-700 mb-1.5">Lien (GitHub / site)</label>
+            <input id="projet-lien" type="url" placeholder="https://github.com/..."
+              class="form-input"/>
+          </div>
+
+          <!-- Date -->
+          <div>
+            <label class="block text-sm font-bold text-slate-700 mb-1.5">Date d'ajout</label>
+            <input id="projet-date" type="date" class="form-input"/>
+          </div>
+
+          <!-- Image -->
+          <div>
+            <label class="block text-sm font-bold text-slate-700 mb-1.5">Image du projet</label>
+            <div class="border-2 border-dashed border-slate-200 rounded-xl p-6 text-center hover:border-amber-400 transition cursor-pointer"
+              onclick="document.getElementById('projet-image').click()">
+              <svg class="w-8 h-8 text-slate-300 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                  d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+              </svg>
+              <p class="text-sm text-slate-400">Cliquez pour choisir une image</p>
+              <input id="projet-image" type="file" accept="image/*" class="hidden"/>
+            </div>
+            <img id="img-preview" class="hidden mt-4 w-full h-40 object-cover rounded-xl shadow"/>
+          </div>
+
+          <!-- Boutons -->
+          <div class="flex gap-3 pt-2">
+            <button type="submit"
+              class="flex-1 bg-amber-400 text-slate-900 font-extrabold py-3.5 rounded-xl hover:bg-amber-300 transition shadow-lg text-sm uppercase tracking-wider">
+              Enregistrer le projet
+            </button>
+            <a href="#projets"
+              class="flex items-center justify-center px-5 border-2 border-slate-200 text-slate-600 font-semibold rounded-xl hover:border-slate-300 transition text-sm">
+              Annuler
+            </a>
+          </div>
+        </form>
+      </div>
+    </section>`;
+
+  initFormulaireAjout();
+}
