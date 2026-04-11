@@ -125,7 +125,7 @@ function renderHome() {
             { icon: '☁️', title: 'DevOps & Cloud',     desc: 'Docker, CI/CD, déploiement AWS et architecture cloud scalable.' },
           ].map((s, i) => `
             <div class="bg-white rounded-2xl p-7 shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300 border border-slate-100 group" data-animate>
-              <div class="text-3xl mb-4">${s.icon}</div>
+        <i class="${s.iconClass} text-3xl mb-4"></i>
               <h3 class="text-lg font-bold text-slate-800 mb-2 group-hover:text-amber-500 transition">${s.title}</h3>
               <p class="text-slate-500 text-sm leading-relaxed">${s.desc}</p>
             </div>
