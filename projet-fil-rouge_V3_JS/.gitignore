@@ -1,0 +1,17 @@
+# Scripts d'automatisation
+git-commits*.sh
+*-timed.sh
+*-2h.sh
+
+# Temporaires
+*.tmp
+*.temp
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# node_modules
+node_modules/
+

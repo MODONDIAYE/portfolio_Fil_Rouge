@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Portfolio — Modou NDIAYE</title>
+  <meta name="description" content="Portfolio de Modou NDIAYE, Développeur Fullstack & UI Designer basé à Dakar, Sénégal." />
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
+
+  <!-- Tailwind (CDN pour compatibilité sans build) -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            navy: '#0f1e3c',
+            'navy-mid': '#1a2f5a',
+          },
+          fontFamily: {
+            sans: ['Syne', 'sans-serif'],
+            body: ['DM Sans', 'sans-serif'],
+          },
+        },
+      },
+    };
+  </script>
+
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="src/css/output.css" />
+
+  <style>
+    /* Fallback styles si output.css absent (dev sans build) */
+    body { font-family: 'Syne', sans-serif; }
+
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(30px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes scaleIn {
+      from { opacity: 0; transform: scale(0.92); }
+      to   { opacity: 1; transform: scale(1); }
+    }
+    @keyframes fadeInLeft {
+      from { opacity: 0; transform: translateX(-30px); }
+      to   { opacity: 1; transform: translateX(0); }
+    }
+    @keyframes pulseRing {
+      0%   { box-shadow: 0 0 0 0 rgba(245,158,11,.5); }
+      70%  { box-shadow: 0 0 0 14px rgba(245,158,11,0); }
+      100% { box-shadow: 0 0 0 0 rgba(245,158,11,0); }
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .animate-fade-in-up   { animation: fadeInUp 0.7s ease both; }
+    .animate-fade-in-left { animation: fadeInLeft 0.7s ease both; }
+    .animate-scale-in     { animation: scaleIn 0.65s ease both; }
+    .animate-delay-200    { animation-delay: .2s; }
+    .animate-spin         { animation: spin 1s linear infinite; }
+    .pulse-avatar         { animation: pulseRing 2.5s ease-in-out infinite; }
+
+    .navbar-link { position: relative; transition: color .2s; }
+    .navbar-link::after {
+      content:''; position: absolute; left:0; bottom:-4px;
+      width:0; height:2px; background:#f59e0b; transition: width .3s;
+    }
+    .navbar-link:hover::after, .navbar-link.active::after { width: 100%; }
+    .navbar-link:hover, .navbar-link.active { color: #f59e0b; }
+
+    .skill-bar-fill {
+      height: 6px; border-radius: 9999px;
+      background: linear-gradient(90deg, #0f1e3c, #f59e0b);
+      transition: width 1.2s cubic-bezier(.4,0,.2,1);
+    }
+
+    .project-card { transition: transform .3s, box-shadow .3s; }
+    .project-card:hover { transform: translateY(-6px); box-shadow: 0 20px 40px rgba(0,0,0,.12); }
+    .project-card img { transition: transform .5s; }
+    .project-card:hover img { transform: scale(1.08); }
+
+    .form-input {
+      width: 100%; padding: .75rem 1rem; border-radius: .75rem;
+      border: 1px solid #e2e8f0; background: #fff; color: #1e293b;
+      font-size: .875rem; transition: box-shadow .2s, border-color .2s;
+      outline: none;
+    }
+    .form-input:focus { border-color: #f59e0b; box-shadow: 0 0 0 3px rgba(245,158,11,.2); }
+
+    .section-label { font-size: .7rem; font-weight: 800; letter-spacing: .15em; text-transform: uppercase; color: #f59e0b; }
+    .section-title { font-size: 2.25rem; font-weight: 800; color: #1e293b; margin-top: .25rem; }
+    .section-divider { width: 3rem; height: 4px; background: #f59e0b; border-radius: 9999px; margin-top: 1rem; margin-bottom: 1.5rem; }
+
+    .btn-primary {
+      display: inline-flex; align-items: center; gap: .5rem;
+      background: #f59e0b; color: #0f172a; font-weight: 700;
+      padding: .75rem 1.5rem; border-radius: .75rem;
+      transition: background .2s, transform .2s; cursor: pointer;
+      text-decoration: none; font-size: .875rem;
+    }
+    .btn-primary:hover { background: #fcd34d; transform: scale(1.04); }
+
+    ::-webkit-scrollbar { width: 5px; }
+    ::-webkit-scrollbar-track { background: #f1f5f9; }
+    ::-webkit-scrollbar-thumb { background: #1a2f5a; border-radius: 9999px; }
+
+    #modal-overlay { backdrop-filter: blur(4px); }
+  </style>
+</head>
+
+<body class="bg-slate-50 text-slate-800" style="font-family:'Syne',sans-serif">
+
+  <!-- ═══════════════════ NAVBAR ═══════════════════ -->
+  <header id="navbar"
+    class="fixed top-0 left-0 right-0 z-40 bg-[#0f1e3c] transition-all duration-300">
+    <nav class="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
+
+      <!-- Logo -->
+      <a href="#home" class="text-white text-xl font-extrabold tracking-tight hover:text-amber-400 transition">
+        <span class="text-amber-400">Modou</span>&nbsp;NDIAYE
+      </a>
+
+      <!-- Desktop menu -->
+      <div class="hidden md:flex items-center gap-8">
+        <a href="#home"     class="navbar-link text-slate-200 text-sm">Accueil</a>
+        <a href="#projets"  class="navbar-link text-slate-200 text-sm">Projets</a>
+        <a href="#ajouter"  class="navbar-link text-slate-200 text-sm">Ajouter</a>
+        <a href="#contact"  class="navbar-link text-slate-200 text-sm">Contact</a>
+        <a href="src/assets/CV_Modou_NIDAYE_Sysadmin_Junior(1).pdf" download
+          class="btn-primary text-xs py-2 px-4">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414A1 1 0 0119 10v11a2 2 0 01-2 2z"/>
+          </svg>
+          CV
+        </a>
+      </div>
+
+      <!-- Burger (mobile) -->
+      <button id="burger-btn" class="md:hidden text-white p-2 focus:outline-none" aria-label="Menu">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+        </svg>
+      </button>
+    </nav>
+
+    <!-- Mobile menu -->
+    <div id="mobile-menu" class="hidden md:hidden bg-[#0f1e3c] border-t border-white/10">
+      <div class="flex flex-col px-6 py-4 gap-4">
+        <a href="#home"    class="navbar-link text-slate-200 text-sm py-1">Accueil</a>
+        <a href="#projets" class="navbar-link text-slate-200 text-sm py-1">Projets</a>
+        <a href="#ajouter" class="navbar-link text-slate-200 text-sm py-1">Ajouter</a>
+        <a href="#contact" class="navbar-link text-slate-200 text-sm py-1">Contact</a>
+      </div>
+    </div>
+  </header>
+
+  <!-- ═══════════════════ MAIN CONTENT ═══════════════════ -->
+  <main id="app" class="pt-[64px] min-h-screen">
+    <!-- Chargé dynamiquement par main.js -->
+    <div class="flex items-center justify-center h-[80vh]">
+      <div class="w-10 h-10 border-4 border-amber-400 border-t-transparent rounded-full animate-spin"></div>
+    </div>
+  </main>
+
+  <!-- ═══════════════════ FOOTER ═══════════════════ -->
+  <footer class="bg-[#0f1e3c] text-white pt-14 pb-6">
+    <div class="max-w-6xl mx-auto px-6 grid md:grid-cols-4 gap-10">
+
+      <!-- Présentation -->
+      <div class="md:col-span-2">
+        <h2 class="text-2xl font-extrabold mb-3">
+          <span class="text-amber-400">Modou</span> NDIAYE
+        </h2>
+        <p class="text-slate-300 text-sm leading-relaxed max-w-xs">
+          Développeur Fullstack passionné, spécialisé dans la création d'applications
+          web modernes, performantes et centrées sur l'expérience utilisateur.
+        </p>
+      </div>
+
+      <!-- Navigation -->
+      <div>
+        <h3 class="text-sm font-bold uppercase tracking-widest text-amber-400 mb-4">Navigation</h3>
+        <ul class="space-y-2 text-sm text-slate-300">
+          <li><a href="#home"    class="hover:text-amber-400 transition">Accueil</a></li>
+          <li><a href="#projets" class="hover:text-amber-400 transition">Projets</a></li>
+          <li><a href="#ajouter" class="hover:text-amber-400 transition">Ajouter un projet</a></li>
+          <li><a href="#contact" class="hover:text-amber-400 transition">Contact</a></li>
+        </ul>
+      </div>
+
+      <!-- Contact -->
+      <div>
+        <h3 class="text-sm font-bold uppercase tracking-widest text-amber-400 mb-4">Contact</h3>
+        <ul class="space-y-2 text-sm text-slate-300">
+          <li>m2243d@gmail.com</li>
+          <li>+221 78 483 11 92</li>
+          <li>Dakar, Sénégal</li>
+        </ul>
+        <div class="flex gap-3 mt-5">
+          <a href="#" class="w-9 h-9 bg-white/10 hover:bg-amber-400 rounded-full flex items-center justify-center transition" title="GitHub">
+            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M12 .5C5.73.5.5 5.73.5 12a11.5 11.5 0 008 10.94c.58.1.79-.25.79-.56v-2.02c-3.25.7-3.94-1.57-3.94-1.57-.53-1.34-1.3-1.7-1.3-1.7-1.06-.73.08-.72.08-.72 1.18.08 1.8 1.2 1.8 1.2 1.04 1.8 2.72 1.28 3.38.98.1-.76.4-1.28.72-1.58-2.6-.3-5.34-1.3-5.34-5.78 0-1.28.46-2.32 1.2-3.14-.12-.3-.52-1.52.12-3.16 0 0 .98-.32 3.2 1.2a11.1 11.1 0 015.82 0c2.22-1.52 3.2-1.2 3.2-1.2.64 1.64.24 2.86.12 3.16.74.82 1.2 1.86 1.2 3.14 0 4.5-2.74 5.48-5.35 5.78.42.36.8 1.1.8 2.22v3.3c0 .3.2.66.8.55A11.5 11.5 0 0023.5 12C23.5 5.73 18.27.5 12 .5z"/>
+            </svg>
+          </a>
+          <a href="#" class="w-9 h-9 bg-white/10 hover:bg-amber-400 rounded-full flex items-center justify-center transition" title="LinkedIn">
+            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M4.98 3.5C4.98 5 3.86 6.1 2.5 6.1S0 5 0 3.5 1.12.9 2.5.9 4.98 2 4.98 3.5zM.5 8h4V24h-4V8zm7 0h3.8v2.2h.05c.53-1 1.84-2.2 3.8-2.2C19.5 8 21 10 21 13.3V24h-4v-9.4c0-2.2-.8-3.7-2.8-3.7-1.5 0-2.4 1-2.8 2-.15.4-.2 1-.2 1.6V24h-4V8z"/>
+            </svg>
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <div class="border-t border-white/10 mt-10 pt-6 text-center text-slate-400 text-xs">
+      © 2026 Modou NDIAYE — Tous droits réservés
+    </div>
+  </footer>
+
+  <!-- ═══════════════════ SCRIPTS ═══════════════════ -->
+  <script type="module" src="src/main.js"></script>
+</body>
+</html>
