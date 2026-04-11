@@ -219,3 +219,80 @@ function renderHome() {
   animateSkillBars();
   initSmoothScroll();
 }
+
+// ─── Vue Projets ──────────────────────────────────────────────────────────────
+
+function renderProjets() {
+  const app = document.getElementById('app');
+  const projets = getAllProjets();
+  const categories = ['tous', ...new Set(projets.map((p) => p.categorie))];
+
+  app.innerHTML = `
+    <section class="min-h-screen bg-slate-50 py-14">
+      <div class="max-w-6xl mx-auto px-6">
+
+        <!-- Titre -->
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-10" data-animate>
+          <div>
+            <span class="section-label">Mon travail</span>
+            <h2 class="section-title">Mes Projets</h2>
+            <div class="section-divider"></div>
+          </div>
+          <a href="#ajouter" class="btn-primary self-start md:self-center">
+            <i class="fas fa-plus text-sm"></i>
+            </svg>
+            Ajouter
+          </a>
+        </div>
+
+        <!-- STATS -->
+        <div class="grid grid-cols-3 gap-4 mb-10">
+          <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-5 text-center">
+            <p class="text-3xl font-extrabold text-[#0f1e3c]" id="stat-count">0</p>
+            <p class="text-slate-400 text-sm mt-1">Projets</p>
+          </div>
+          <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-5 text-center">
+            <p class="text-3xl font-extrabold text-[#0f1e3c]" id="stat-techs">0</p>
+            <p class="text-slate-400 text-sm mt-1">Technologies</p>
+          </div>
+          <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-5 text-center">
+            <p class="text-3xl font-extrabold text-[#0f1e3c]" id="stat-date">—</p>
+            <p class="text-slate-400 text-sm mt-1">Dernier ajout</p>
+          </div>
+        </div>
+
+        <!-- FILTRES + RECHERCHE -->
+        <div class="flex flex-col md:flex-row gap-4 mb-8">
+          <!-- Catégories -->
+          <div id="filtres-categorie" class="flex flex-wrap gap-2">
+            ${categories.map((c, i) => `
+              <button data-categorie="${c}"
+                class="text-sm font-semibold px-4 py-1.5 rounded-full border border-slate-200 transition cursor-pointer
+                  ${i === 0 ? 'bg-navy text-white border-navy' : 'bg-white text-slate-600 hover:border-amber-400'}">
+                ${c === 'tous' ? 'Tous' : c}
+              </button>
+            `).join('')}
+          </div>
+
+          <!-- Recherche -->
+          <div class="relative md:ml-auto">
+            <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400"></i>
+            </svg>
+            <input id="input-recherche" type="text" placeholder="Rechercher..."
+              class="pl-9 pr-4 py-2 rounded-xl border border-slate-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-amber-400 w-full md:w-56"/>
+          </div>
+        </div>
+
+        <!-- GRILLE -->
+        <div id="grille-projets" class="grid md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+      </div>
+    </section>`;
+
+  renderProjetsGrid('grille-projets', projets);
+  updateStats(projets);
+  initSuppressionListeners('grille-projets');
+  initVoirListeners('grille-projets');
+  initRecherche('input-recherche', 'grille-projets');
+  initFiltresCategorie('filtres-categorie', 'grille-projets');
+  initScrollAnimations();
+}
