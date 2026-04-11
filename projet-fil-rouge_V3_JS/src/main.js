@@ -608,3 +608,27 @@ function renderContact() {
     }, 1200);
   });
 }
+
+
+// ─── Vue Détail ───────────────────────────────────────────────────────────────
+
+function renderDetail(id) {
+  const app = document.getElementById('app');
+  app.innerHTML = `
+    <section class="min-h-screen bg-slate-50 py-14 px-6">
+      <div id="detail-container" class="max-w-6xl mx-auto"></div>
+    </section>`;
+  renderDetailProjet(id, 'detail-container');
+}
+
+// ─── Bootstrap ────────────────────────────────────────────────────────────────
+
+document.addEventListener('DOMContentLoaded', () => {
+  initNavbar();
+  router();
+  window.addEventListener('hashchange', () => {
+    router();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+});
+
