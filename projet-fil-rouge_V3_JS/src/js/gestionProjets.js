@@ -128,6 +128,8 @@ export function initVoirListeners(gridId) {
  * Initialise et valide le formulaire d'ajout de projet.
  * @param {string} formId
  */
+
+
 export function initFormulaireAjout() {
   const form = document.getElementById('formulaire-ajout-projet') || document.querySelector('#app form');
   if (!form) {
