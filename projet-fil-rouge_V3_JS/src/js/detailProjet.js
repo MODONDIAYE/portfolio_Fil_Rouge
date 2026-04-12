@@ -59,3 +59,10 @@ export function renderDetailProjet(id, containerId) {
         ...
       </div>
     </div>`;
+      // Listeners retour
+  container.querySelectorAll('.btn-retour-liste').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      window.location.hash = '#projets';
+    });
+  });
+}
