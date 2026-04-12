@@ -107,34 +107,57 @@ function renderHome() {
       </svg>
     </section>
 
-    <!-- SERVICES -->
-    <section class="py-20 bg-slate-50" id="services">
-      <div class="max-w-6xl mx-auto px-6">
-        <div class="text-center mb-14" data-animate>
-          <span class="section-label">Ce que je fais</span>
-          <h2 class="section-title">Mes services</h2>
-          <div class="section-divider mx-auto"></div>
-        </div>
+<!-- SERVICES -->
+<section class="py-20 bg-slate-50" id="services">
+  <div class="max-w-6xl mx-auto px-6">
+    <div class="text-center mb-14" data-animate>
+      <span class="section-label">Ce que je fais</span>
+      <h2 class="section-title">Mes services</h2>
+      <div class="section-divider mx-auto"></div>
+    </div>
 
-        <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-          ${[
-            { icon: '🌐', title: 'Développement Web', desc: 'Création de sites et applications web responsive, performants et accessibles.' },
-            { icon: '⚙️', title: 'API & Backend',     desc: 'Conception d\'APIs RESTful sécurisées avec Node.js, Express et Laravel.' },
-            { icon: '🗄️', title: 'Base de données',   desc: 'Gestion SQL (MySQL, PostgreSQL) et NoSQL (MongoDB) avec optimisation.' },
-            { icon: '📱', title: 'Mobile',             desc: 'Applications cross-platform avec React Native et Flutter.' },
-            { icon: '🎨', title: 'UX/UI Design',       desc: 'Interfaces centrées utilisateur, maquettes Figma et design systems.' },
-            { icon: '☁️', title: 'DevOps & Cloud',     desc: 'Docker, CI/CD, déploiement AWS et architecture cloud scalable.' },
-          ].map((s, i) => `
-            <div class="bg-white rounded-2xl p-7 shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300 border border-slate-100 group" data-animate>
-              <div class="text-3xl mb-4">${s.icon}</div>
-              <h3 class="text-lg font-bold text-slate-800 mb-2 group-hover:text-amber-500 transition">${s.title}</h3>
-              <p class="text-slate-500 text-sm leading-relaxed">${s.desc}</p>
-            </div>
-          `).join('')}
+    <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+      ${[
+        { 
+          icon: `<i class="fas fa-globe text-slate-600 text-3xl"></i>`, 
+          title: 'Développement Web', 
+          desc: 'Création de sites et applications web responsive, performants et accessibles.' 
+        },
+        { 
+          icon: `<i class="fas fa-cogs text-slate-600 text-3xl"></i>`, 
+          title: 'API & Backend',     
+          desc: 'Conception d\'APIs RESTful sécurisées avec Node.js, Express et Laravel.' 
+        },
+        { 
+          icon: `<i class="fas fa-database text-slate-600 text-3xl"></i>`, 
+          title: 'Base de données',   
+          desc: 'Gestion SQL (MySQL, PostgreSQL) et NoSQL (MongoDB) avec optimisation.' 
+        },
+        { 
+          icon: `<i class="fas fa-mobile-alt text-slate-600 text-3xl"></i>`, 
+          title: 'Mobile',             
+          desc: 'Applications cross-platform avec React Native et Flutter.' 
+        },
+        { 
+          icon: `<i class="fas fa-pencil-ruler text-slate-600 text-3xl"></i>`, 
+          title: 'UX/UI Design',       
+          desc: 'Interfaces centrées utilisateur, maquettes Figma et design systems.' 
+        },
+        { 
+          icon: `<i class="fas fa-cloud text-slate-600 text-3xl"></i>`, 
+          title: 'DevOps & Cloud',     
+          desc: 'Docker, CI/CD, déploiement AWS et architecture cloud scalable.' 
+        },
+      ].map((s, i) => `
+        <div class="bg-white rounded-2xl p-7 shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300 border border-slate-100 group" data-animate>
+          <div class="mb-4">${s.icon}</div>
+          <h3 class="text-lg font-bold text-slate-800 mb-2 group-hover:text-amber-500 transition">${s.title}</h3>
+          <p class="text-slate-500 text-sm leading-relaxed">${s.desc}</p>
         </div>
-      </div>
-    </section>
-
+      `).join('')}
+    </div>
+  </div>
+</section>
     <!-- À PROPOS -->
     <section class="py-20 bg-white">
       <div class="max-w-6xl mx-auto px-6">
@@ -426,38 +449,49 @@ function renderContact() {
         <div class="grid md:grid-cols-5 gap-8">
 
           <!-- INFOS -->
-          <div class="md:col-span-2 space-y-4 animate-fade-in-left">
-            ${[
-              { icon: '📧', label: 'Email',     value: 'm2243d@gmail.com' },
-              { icon: '📞', label: 'Téléphone', value: '+221 78 483 11 92' },
-              { icon: '📍', label: 'Localité',  value: 'Dakar, Sénégal' },
-            ].map(c => `
-              <div class="bg-white/10 backdrop-blur-sm rounded-2xl p-5 flex items-center gap-4">
-                <div class="text-2xl">${c.icon}</div>
-                <div>
-                  <p class="text-slate-400 text-xs">${c.label}</p>
-                  <p class="text-white font-semibold text-sm">${c.value}</p>
-                </div>
-              </div>
-            `).join('')}
+<div class="md:col-span-2 space-y-4 animate-fade-in-left">
+  ${[
+    { 
+      icon: `<i class="fas fa-envelope text-slate-300 text-2xl"></i>`, 
+      label: 'Email',     
+      value: 'm2243d@gmail.com' 
+    },
+    { 
+      icon: `<i class="fas fa-phone text-slate-300 text-2xl"></i>`, 
+      label: 'Téléphone', 
+      value: '+221 78 483 11 92' 
+    },
+    { 
+      icon: `<i class="fas fa-map-marker-alt text-slate-300 text-2xl"></i>`, 
+      label: 'Localité',  
+      value: 'Dakar, Sénégal' 
+    },
+  ].map(c => `
+    <div class="bg-white/10 backdrop-blur-sm rounded-2xl p-5 flex items-center gap-4">
+      <div>${c.icon}</div>
+      <div>
+        <p class="text-slate-400 text-xs">${c.label}</p>
+        <p class="text-white font-semibold text-sm">${c.value}</p>
+      </div>
+    </div>
+  `).join('')}
 
-            <!-- Réseaux -->
-            <div class="bg-white/10 backdrop-blur-sm rounded-2xl p-5">
-              <p class="text-slate-400 text-xs mb-3">Réseaux sociaux</p>
-              <div class="flex gap-3">
-                ${[
-                  { label: 'GitHub',   href: '#' },
-                  { label: 'LinkedIn', href: '#' },
-                  { label: 'Twitter',  href: '#' },
-                ].map(r => `
-                  <a href="${r.href}" class="bg-white/20 text-white text-xs font-semibold px-3 py-2 rounded-xl hover:bg-amber-400 hover:text-slate-900 transition">
-                    ${r.label}
-                  </a>
-                `).join('')}
-              </div>
-            </div>
-          </div>
-
+  <!-- Réseaux -->
+  <div class="bg-white/10 backdrop-blur-sm rounded-2xl p-5">
+    <p class="text-slate-400 text-xs mb-3">Réseaux sociaux</p>
+    <div class="flex gap-3">
+      ${[
+        { label: 'GitHub',   href: '#', icon: '<i class="fab fa-github"></i>' },
+        { label: 'LinkedIn', href: '#', icon: '<i class="fab fa-linkedin"></i>' },
+        { label: 'Twitter',  href: '#', icon: '<i class="fab fa-twitter"></i>' },
+      ].map(r => `
+        <a href="${r.href}" class="flex items-center gap-2 bg-white/20 text-white text-xs font-semibold px-3 py-2 rounded-xl hover:bg-amber-400 hover:text-slate-900 transition">
+          ${r.icon} ${r.label}
+        </a>
+      `).join('')}
+    </div>
+  </div>
+</div>
           <!-- FORMULAIRE -->
           <div class="md:col-span-3 animate-scale-in animate-delay-200">
             <div class="bg-white rounded-3xl shadow-2xl p-8">
