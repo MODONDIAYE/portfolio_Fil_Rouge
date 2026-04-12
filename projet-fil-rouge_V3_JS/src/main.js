@@ -74,7 +74,8 @@ function renderHome() {
           </p>
           <div class="flex flex-wrap gap-4">
             <a href="#projets" class="btn-primary">
-              <i class="fas fa-arrow-right text-sm"></i>
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0l-4-4m4 4l-4 4"/>
               </svg>
               Voir mes projets
             </a>
@@ -125,7 +126,7 @@ function renderHome() {
             { icon: '☁️', title: 'DevOps & Cloud',     desc: 'Docker, CI/CD, déploiement AWS et architecture cloud scalable.' },
           ].map((s, i) => `
             <div class="bg-white rounded-2xl p-7 shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300 border border-slate-100 group" data-animate>
-        <i class="${s.iconClass} text-3xl mb-4"></i>
+              <div class="text-3xl mb-4">${s.icon}</div>
               <h3 class="text-lg font-bold text-slate-800 mb-2 group-hover:text-amber-500 transition">${s.title}</h3>
               <p class="text-slate-500 text-sm leading-relaxed">${s.desc}</p>
             </div>
@@ -239,7 +240,8 @@ function renderProjets() {
             <div class="section-divider"></div>
           </div>
           <a href="#ajouter" class="btn-primary self-start md:self-center">
-            <i class="fas fa-plus text-sm"></i>
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
             </svg>
             Ajouter
           </a>
@@ -276,7 +278,8 @@ function renderProjets() {
 
           <!-- Recherche -->
           <div class="relative md:ml-auto">
-            <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400"></i>
+            <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0"/>
             </svg>
             <input id="input-recherche" type="text" placeholder="Rechercher..."
               class="pl-9 pr-4 py-2 rounded-xl border border-slate-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-amber-400 w-full md:w-56"/>
@@ -297,8 +300,7 @@ function renderProjets() {
   initScrollAnimations();
 }
 
-
-// ─── Vue Ajouter 
+// ─── Vue Ajouter ──────────────────────────────────────────────────────────────
 
 function renderAjouter() {
   const app = document.getElementById('app');
@@ -311,7 +313,7 @@ function renderAjouter() {
           <p class="text-slate-300 mt-2 text-sm">Renseignez les informations de votre nouveau projet</p>
         </div>
 
-        <form id="formulaire-ajout-projet" class="bg-white rounded-3xl shadow-2xl p-8 md:p-10 space-y-6 animate-scale-in">
+        <form id="form-ajout" class="bg-white rounded-3xl shadow-2xl p-8 md:p-10 space-y-6 animate-scale-in">
 
           <!-- Nom -->
           <div>
@@ -400,112 +402,8 @@ function renderAjouter() {
       </div>
     </section>`;
 
-  initFormulaireAjout();
+  initFormulaireAjout('form-ajout');
 }
-
-function renderAjouter() {
-  const app = document.getElementById('app');
-  app.innerHTML = `
-    <section class="min-h-screen bg-gradient-to-br from-[#0f1e3c] to-[#1a2f5a] py-14 px-6">
-      <div class="max-w-2xl mx-auto">
-
-        <div class="text-center mb-10 animate-fade-in-up">
-          <h2 class="text-4xl font-extrabold text-white">Ajouter un projet</h2>
-          <p class="text-slate-300 mt-2 text-sm">Renseignez les informations de votre nouveau projet</p>
-        </div>
-
-        <form id="formulaire-ajout-projet" class="bg-white rounded-3xl shadow-2xl p-8 md:p-10 space-y-6 animate-scale-in">
-
-          <!-- Nom -->
-          <div>
-            <label class="block text-sm font-bold text-slate-700 mb-1.5">
-              Nom du projet <span class="text-red-400">*</span>
-            </label>
-            <input id="projet-nom" type="text" placeholder="Ex : Plateforme E-commerce"
-              class="form-input"/>
-          </div>
-
-          <!-- Catégorie -->
-          <div>
-            <label class="block text-sm font-bold text-slate-700 mb-1.5">
-              Catégorie <span class="text-red-400">*</span>
-            </label>
-            <select id="projet-categorie" class="form-input">
-              <option value="">-- Choisir --</option>
-              <option>Web</option>
-              <option>App</option>
-              <option>UI/UX</option>
-              <option>Mobile</option>
-              <option>E-commerce</option>
-              <option>Santé</option>
-            </select>
-          </div>
-
-          <!-- Description -->
-          <div>
-            <label class="block text-sm font-bold text-slate-700 mb-1.5">
-              Description <span class="text-red-400">*</span>
-            </label>
-            <textarea id="projet-description" rows="4" placeholder="Décrivez votre projet..."
-              class="form-input resize-none"></textarea>
-          </div>
-
-          <!-- Technologies -->
-          <div>
-            <label class="block text-sm font-bold text-slate-700 mb-1.5">
-              Technologies <span class="text-red-400">*</span>
-            </label>
-            <input id="projet-technologies" type="text" placeholder="HTML, CSS, JavaScript, React"
-              class="form-input"/>
-            <p class="text-xs text-slate-400 mt-1">Séparez par des virgules</p>
-          </div>
-
-          <!-- Lien -->
-          <div>
-            <label class="block text-sm font-bold text-slate-700 mb-1.5">Lien (GitHub / site)</label>
-            <input id="projet-lien" type="url" placeholder="https://github.com/..."
-              class="form-input"/>
-          </div>
-
-          <!-- Date -->
-          <div>
-            <label class="block text-sm font-bold text-slate-700 mb-1.5">Date d'ajout</label>
-            <input id="projet-date" type="date" class="form-input"/>
-          </div>
-
-          <!-- Image -->
-          <div>
-            <label class="block text-sm font-bold text-slate-700 mb-1.5">Image du projet</label>
-            <div class="border-2 border-dashed border-slate-200 rounded-xl p-6 text-center hover:border-amber-400 transition cursor-pointer"
-              onclick="document.getElementById('projet-image').click()">
-              <svg class="w-8 h-8 text-slate-300 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
-                  d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
-              </svg>
-              <p class="text-sm text-slate-400">Cliquez pour choisir une image</p>
-              <input id="projet-image" type="file" accept="image/*" class="hidden"/>
-            </div>
-            <img id="img-preview" class="hidden mt-4 w-full h-40 object-cover rounded-xl shadow"/>
-          </div>
-
-          <!-- Boutons -->
-          <div class="flex gap-3 pt-2">
-            <button type="submit"
-              class="flex-1 bg-amber-400 text-slate-900 font-extrabold py-3.5 rounded-xl hover:bg-amber-300 transition shadow-lg text-sm uppercase tracking-wider">
-              Enregistrer le projet
-            </button>
-            <a href="#projets"
-              class="flex items-center justify-center px-5 border-2 border-slate-200 text-slate-600 font-semibold rounded-xl hover:border-slate-300 transition text-sm">
-              Annuler
-            </a>
-          </div>
-        </form>
-      </div>
-    </section>`;
-
-  initFormulaireAjout();
-}
-
 
 // ─── Vue Contact ──────────────────────────────────────────────────────────────
 
@@ -591,8 +489,7 @@ function renderContact() {
       </div>
     </section>`;
 
-
-      // Simulation envoi
+  // Simulation envoi
   document.getElementById('form-contact').addEventListener('submit', (e) => {
     e.preventDefault();
     const btn = document.getElementById('btn-contact-submit');
@@ -608,7 +505,6 @@ function renderContact() {
     }, 1200);
   });
 }
-
 
 // ─── Vue Détail ───────────────────────────────────────────────────────────────
 
@@ -631,4 +527,3 @@ document.addEventListener('DOMContentLoaded', () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   });
 });
-
