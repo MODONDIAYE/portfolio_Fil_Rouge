@@ -20,6 +20,8 @@ const CATEGORIE_COLORS = {
  * @param {Object} projet
  * @returns {string}
  */
+
+// creation de la carte projet
 export function renderProjetCard(projet) {
   const badgeColor = CATEGORIE_COLORS[projet.categorie] || 'bg-slate-500';
   const dateFormatted = new Date(projet.date).toLocaleDateString('fr-FR', {
@@ -97,6 +99,7 @@ export function renderProjetCard(projet) {
       </div>
     </div>`;
 }
+
 
 /**
  * Affiche la grille complète des projets.
