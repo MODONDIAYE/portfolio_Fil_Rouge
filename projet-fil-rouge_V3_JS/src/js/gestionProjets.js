@@ -104,6 +104,8 @@ export function initFiltresCategorie(filtreContainerId, gridId) {
   });
 }
 
+
+// voir les details
 // ─── Voir détails (lien) ──────────────────────────────────────────────────────
 
 /**
@@ -121,6 +123,7 @@ export function initVoirListeners(gridId) {
     window.location.hash = `#detail-${id}`;
   });
 }
+
 
 // ─── Formulaire d'ajout ───────────────────────────────────────────────────────
 
