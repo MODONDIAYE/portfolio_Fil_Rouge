@@ -102,7 +102,9 @@ export function renderProjetCard(projet) {
 
 
 /**
- * Affiche la grille complète des projets.
+ * 
+ affichage grille de projets
+  * Affiche la grille complète des projets.
  * @param {string} containerId — id du conteneur HTML
  * @param {Array} projets — liste (optionnelle, sinon charge depuis API)
  */
@@ -127,6 +129,7 @@ export function renderProjetsGrid(containerId, projets = null) {
 
   container.innerHTML = liste.map(renderProjetCard).join('');
 }
+
 
 /**
  * Met à jour les statistiques (nombre de projets, technologies, année).
