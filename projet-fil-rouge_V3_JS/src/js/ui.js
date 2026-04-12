@@ -35,7 +35,7 @@ export function initNavbar() {
   });
 
 
-// Burger menu
+  // Burger menu
   const burger = document.getElementById('burger-btn');
   const mobileMenu = document.getElementById('mobile-menu');
   burger?.addEventListener('click', () => toggleMobileMenu());
@@ -89,6 +89,9 @@ export function showToast(message, type = 'success', duration = 3000) {
     toast.style.transform = 'translateY(20px)';
   }, duration);
 }
+
+
+
 
 // ─── Modal ────────────────────────────────────────────────────────────────────
 
