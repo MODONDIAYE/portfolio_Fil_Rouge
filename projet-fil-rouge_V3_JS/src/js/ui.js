@@ -34,7 +34,8 @@ export function initNavbar() {
     });
   });
 
-  // Burger menu
+
+// Burger menu
   const burger = document.getElementById('burger-btn');
   const mobileMenu = document.getElementById('mobile-menu');
   burger?.addEventListener('click', () => toggleMobileMenu());
