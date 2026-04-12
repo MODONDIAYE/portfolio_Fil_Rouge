@@ -40,6 +40,8 @@ export function initSuppressionListeners(gridId) {
   });
 }
 
+
+// filtre de recherche
 // ─── Filtre de recherche ──────────────────────────────────────────────────────
 
 /**
@@ -69,6 +71,7 @@ export function initRecherche(inputId, gridId) {
     initVoirListeners(gridId);
   });
 }
+
 
 // ─── Filtre par catégorie ─────────────────────────────────────────────────────
 
