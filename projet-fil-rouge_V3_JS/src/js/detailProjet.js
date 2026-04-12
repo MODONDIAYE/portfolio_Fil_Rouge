@@ -39,3 +39,23 @@ export function renderDetailProjet(id, containerId) {
         <span class="w-2 h-2 rounded-full ${colors.bg} inline-block"></span>${t}
       </span>`
     ).join('');
+
+      container.innerHTML = `
+    <div class="max-w-4xl mx-auto animate-fade-in-up">
+
+      <!-- BREADCRUMB -->
+      ...
+
+      <!-- HERO IMAGE -->
+      ...
+
+      <!-- CONTENU -->
+      <div class="grid md:grid-cols-3 gap-8">
+
+        <!-- Description (2/3) -->
+        ...
+
+        <!-- Infos latérales (1/3) -->
+        ...
+      </div>
+    </div>`;
