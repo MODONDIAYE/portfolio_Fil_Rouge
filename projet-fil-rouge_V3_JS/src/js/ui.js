@@ -91,11 +91,9 @@ export function showToast(message, type = 'success', duration = 3000) {
 }
 
 
-
-
 // ─── Modal ────────────────────────────────────────────────────────────────────
 
-/**
+/** Message de confirmation pour suppression de projet, avec callback onConfirm 
  * Ouvre un modal de confirmation.
  * @param {string} message
  * @param {Function} onConfirm
@@ -139,6 +137,9 @@ export function showConfirmModal(message, onConfirm) {
     onConfirm();
     closeModal();
   });
+
+
+
 
   overlay.addEventListener('click', (e) => {
     if (e.target === overlay) closeModal();
