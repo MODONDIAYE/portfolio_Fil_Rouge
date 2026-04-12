@@ -206,6 +206,7 @@ export function animateSkillBars() {
   document.querySelectorAll('.skill-item').forEach((el) => observer.observe(el));
 }
 
+
 // ─── Smooth scroll pour les ancres ───────────────────────────────────────────
 
 export function initSmoothScroll() {
