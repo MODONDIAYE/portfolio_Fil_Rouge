@@ -1,3 +1,4 @@
+// Ajout et suppression des projets
 /**
  * gestionProjets.js — Ajout & Suppression de projets
  * Orchestre les interactions utilisateur pour la gestion du CRUD.
