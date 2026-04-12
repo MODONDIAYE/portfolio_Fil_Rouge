@@ -17,7 +17,7 @@ const PROJETS_DEFAUT = [
     description2:
       'Le site intègre des animations interactives, une navigation fluide et des pages dédiées pour chaque projet. Il permet également aux visiteurs de me contacter facilement grâce à un formulaire intégré.',
     technologies: ['HTML5', 'Tailwind CSS', 'JavaScript', 'React.js', 'Node.js', 'MongoDB'],
-    image: 'src/assets/portfolio.jpg',
+    image: './src/assets/portfolio.jpg',
     lien: 'https://github.com/modoundiaye',
   },
   {
@@ -30,7 +30,7 @@ const PROJETS_DEFAUT = [
     description2:
       'Interface drag-and-drop intuitive, notifications en temps réel via WebSocket, et tableau de bord analytique pour visualiser la productivité.',
     technologies: ['React.js', 'Node.js', 'Express', 'MongoDB', 'Socket.io', 'Tailwind CSS'],
-    image: 'src/assets/concept-application-gestion-taches_23-2148625232.avif',
+    image: './src/assets/concept-application-gestion-taches_23-2148625232.avif',
     lien: 'https://github.com/modoundiaye',
   },
   {
@@ -43,7 +43,7 @@ const PROJETS_DEFAUT = [
     description2:
       'Maquettes Figma haute-fidélité, système de design tokens, animations micro-interactions et tests utilisateurs réalisés avec 15 participants.',
     technologies: ['Figma', 'Adobe XD', 'Prototyping', 'Design System', 'React Native'],
-    image: 'src/assets/gradient-fitness-app-template_23-2151095461.avif',
+    image: './src/assets/gradient-fitness-app-template_23-2151095461.avif',
     lien: 'https://github.com/modoundiaye',
   },
   {
@@ -56,7 +56,7 @@ const PROJETS_DEFAUT = [
     description2:
       'Sécurisation par biométrie, chiffrement des données, conformité PCI-DSS et intégration avec les principales banques de la sous-région.',
     technologies: ['React Native', 'Node.js', 'PostgreSQL', 'JWT', 'Stripe API'],
-    image: 'src/assets/application-mobile-cashpay.jpg',
+    image: './src/assets/application-mobile-cashpay.jpg',
     lien: 'https://github.com/modoundiaye',
   },
   {
@@ -69,7 +69,7 @@ const PROJETS_DEFAUT = [
     description2:
       'Optimisation SEO, score Lighthouse 95+, intégration CinetPay et Wave pour les paiements africains, système de promotions et codes réduction.',
     technologies: ['Next.js', 'Laravel', 'MySQL', 'CinetPay', 'Redis', 'Docker'],
-    image: 'src/assets/FCB 2026.jpeg',
+    image: './src/assets/FCB 2026.jpeg',
     lien: 'https://github.com/modoundiaye',
   },
   {
@@ -82,7 +82,6 @@ const PROJETS_DEFAUT = [
     description2:
       'Algorithme de recommandation personnalisé, respect RGPD, chiffrement end-to-end des données sensibles et partenariat avec des psychologues certifiés.',
     technologies: ['Flutter', 'Firebase', 'TensorFlow Lite', 'Node.js', 'PostgreSQL'],
-    image: 'src/assets/mentalHealt.jpg',
     lien: 'https://github.com/modoundiaye',
   },
 ];
