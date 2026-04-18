@@ -66,3 +66,43 @@ export default function Dossier() {
     setProjetDetail(updated);
     setModeEdition(false);
   };
+  // ==========================================
+  // 3. GESTION DE L'INTERFACE (UI HANDLERS)
+  // ==========================================
+  
+  const ouvrirDetail = (projet) => {
+    setProjetDetail(projet);
+    setModeEdition(false);
+    setTimeout(() => {
+      document.getElementById('detail-section')?.scrollIntoView({ behavior: 'smooth' });
+    }, 50);
+  };
+
+  const fermerDetail = () => {
+    setProjetDetail(null);
+    setModeEdition(false);
+  };
+
+  // ==========================================
+  // 4. LOGIQUE DE FILTRAGE & CALCULS (MEMO)
+  // ==========================================
+  
+  // Générer la liste unique des catégories
+  const categories = useMemo(
+    () => ['Toutes', ...Array.from(new Set(projets.map((p) => p.categorie)))],
+    [projets]
+  );
+
+  // Filtrer les projets selon la recherche et la catégorie
+  const projetsFiltres = useMemo(() => {
+    const q = recherche.trim().toLowerCase();
+    return projets.filter((p) => {
+      const okCat = categorie === 'Toutes' || p.categorie === categorie;
+      const okRech =
+        !q ||
+        p.nom.toLowerCase().includes(q) ||
+        p.description?.toLowerCase().includes(q) ||
+        p.technologies?.some((t) => t.toLowerCase().includes(q));
+      return okCat && okRech;
+    });
+  }, [projets, recherche, categorie]);
