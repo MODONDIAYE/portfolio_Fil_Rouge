@@ -63,7 +63,7 @@ function renderHome() {
         <!-- TEXT -->
         <div class="flex-1 animate-fade-in-left">
           <span class="inline-block bg-amber-400/20 text-amber-400 text-xs font-bold px-4 py-1.5 rounded-full mb-6 tracking-widest uppercase">
-            Développeur Fullstack
+            Administrateur Réseaux & Systèmes 
           </span>
           <h1 class="text-5xl md:text-6xl font-extrabold leading-tight mb-5">
             Modou<br><span class="text-amber-400">NDIAYE</span>
