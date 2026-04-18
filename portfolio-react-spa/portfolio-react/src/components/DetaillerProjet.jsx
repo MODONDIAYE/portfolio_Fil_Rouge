@@ -123,3 +123,64 @@ export default function DetaillerProjet({
       </div>
     );
   }
+  // ==========================================
+  // 6. RENDU : MODE ÉDITION (FORMULAIRE)
+  // ==========================================
+  return (
+    <form className="detail-card" onSubmit={handleSave}>
+      {/* En-tête Édition */}
+      <div className="detail-head">
+        <div>
+          <span className="section-label">Édition du projet</span>
+          <h2>Modifier : {projet.nom}</h2>
+        </div>
+        <div className="detail-actions">
+          <button type="button" className="btn-ghost" onClick={onAnnulerEdition}>
+            <i className="fa-solid fa-xmark" /> Annuler
+          </button>
+          <button type="submit" className="btn-primary">
+            <i className="fa-solid fa-floppy-disk" /> Enregistrer
+          </button>
+        </div>
+      </div>
+
+      {/* Grille du Formulaire */}
+      <div className="form-grid">
+        <div className="field">
+          <label>Nom</label>
+          <input name="nom" value={form.nom || ''} onChange={handleChange} />
+        </div>
+        <div className="field">
+          <label>Catégorie</label>
+          <select name="categorie" value={form.categorie || 'Web'} onChange={handleChange}>
+            {CATEGORIES.map((c) => <option key={c} value={c}>{c}</option>)}
+          </select>
+        </div>
+        <div className="field">
+          <label>Date</label>
+          <input type="date" name="date" value={(form.date || '').slice(0, 10)} onChange={handleChange} />
+        </div>
+        <div className="field">
+          <label>Lien</label>
+          <input name="lien" value={form.lien || ''} onChange={handleChange} />
+        </div>
+        <div className="field full">
+          <label>Image (URL)</label>
+          <input name="image" value={form.image || ''} onChange={handleChange} />
+        </div>
+        <div className="field full">
+          <label>Description</label>
+          <textarea name="description" rows="3" value={form.description || ''} onChange={handleChange} />
+        </div>
+        <div className="field full">
+          <label>Description détaillée</label>
+          <textarea name="description2" rows="3" value={form.description2 || ''} onChange={handleChange} />
+        </div>
+        <div className="field full">
+          <label>Technologies (séparées par des virgules)</label>
+          <input name="technologies" value={form.technologies || ''} onChange={handleChange} />
+        </div>
+      </div>
+    </form>
+  );
+}
