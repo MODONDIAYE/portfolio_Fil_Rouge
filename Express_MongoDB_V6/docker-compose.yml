@@ -1,0 +1,75 @@
+# ════════════════════════════════════════════════════════
+# SERVICES — 3 conteneurs : mongodb · backend · frontend
+# ════════════════════════════════════════════════════════
+services:
+
+  # ── 1. MongoDB ────────────────────────────────────────
+  mongodb:
+    image: mongo:7.0
+    container_name: portfolio_mongodb
+    restart: unless-stopped
+    ports:
+      - "27017:27017"           # accessible depuis MongoDB Compass
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: mn2243d_db_user
+      MONGO_INITDB_ROOT_PASSWORD: "P@sser123"
+      MONGO_INITDB_DATABASE: portfolio_db
+    volumes:
+      - mongodb_data:/data/db   # données persistantes
+    networks:
+      - portfolio_network
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ── 2. Backend Express.js ─────────────────────────────
+  backend:
+    build:
+      context: ./backend-expressJS
+      dockerfile: Dockerfile
+    container_name: portfolio_backend
+    restart: unless-stopped
+    ports:
+      - "5000:5000"
+    environment:
+      PORT: 5000
+      NODE_ENV: production
+      # ⚠️ "mongodb" = nom du service ci-dessus (pas localhost !)
+      MONGODB_URI: "mongodb://mn2243d_db_user:P%40sser123@mongodb:27017/portfolio_db?authSource=admin"
+      JWT_SECRET: votre_secret_jwt_tres_securise_ici
+      FRONTEND_URL: "http://localhost"
+    depends_on:
+      mongodb:
+        condition: service_healthy  # attend que MongoDB soit prêt
+    networks:
+      - portfolio_network
+
+  # ── 3. Frontend React (Nginx) ─────────────────────────
+  frontend:
+    build:
+      context: ./frontend-react
+      dockerfile: Dockerfile
+    container_name: portfolio_frontend
+    restart: unless-stopped
+    ports:
+      - "80:80"                 # http://localhost
+    depends_on:
+      - backend
+    networks:
+      - portfolio_network
+
+# ════════════════════════════════════════════════════════
+# VOLUMES — persistance des données MongoDB
+# ════════════════════════════════════════════════════════
+volumes:
+  mongodb_data:
+    driver: local
+
+# ════════════════════════════════════════════════════════
+# NETWORKS — réseau interne entre les conteneurs
+# ════════════════════════════════════════════════════════
+networks:
+  portfolio_network:
+    driver: bridge
