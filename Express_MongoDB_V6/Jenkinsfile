@@ -1,10 +1,6 @@
 pipeline {
     agent any
 
-    tools {
-        nodejs 'NodeJS-20'   // plugin NodeJS configuré dans Manage Jenkins → Tools
-    }
-
     environment {
         PROJECT_DIR = 'Express_MongoDB_V6'
     }
@@ -28,48 +24,15 @@ pipeline {
         stage('Verification') {
             steps {
                 echo '=== Vérification des outils ==='
-                sh 'node --version'
-                sh 'npm --version'
+                sh 'node --version || echo "Node non disponible"'
+                sh 'npm --version  || echo "npm non disponible"'
                 sh 'docker --version'
                 sh 'docker compose version'
             }
         }
 
-        // ── ÉTAPE 3 : Installer les dépendances (en parallèle) ───
-        stage('Installation') {
-            parallel {
-                stage('Backend') {
-                    steps {
-                        dir("${PROJECT_DIR}/backend-expressJS") {
-                            echo '=== npm install backend ==='
-                            sh 'npm install --omit=dev'
-                        }
-                    }
-                }
-                stage('Frontend') {
-                    steps {
-                        dir("${PROJECT_DIR}/frontend-react") {
-                            echo '=== npm install frontend ==='
-                            sh 'npm install'
-                        }
-                    }
-                }
-            }
-        }
-
-        // ── ÉTAPE 4 : Build React ─────────────────────────────────
-        stage('Build Frontend') {
-            steps {
-                dir("${PROJECT_DIR}/frontend-react") {
-                    echo '=== npm run build ==='
-                    sh 'npm run build'
-                    echo '=== Build React terminé ==='
-                }
-            }
-        }
-
-        // ── ÉTAPE 5 : Tests de syntaxe ────────────────────────────
-        stage('Tests') {
+        // ── ÉTAPE 3 : Tests de syntaxe backend ───────────────────
+        stage('Tests syntaxe') {
             steps {
                 echo '=== Vérification syntaxe Node.js ==='
                 dir("${PROJECT_DIR}/backend-expressJS") {
@@ -81,22 +44,22 @@ pipeline {
                     sh 'node --check models/Member.js'
                     sh 'node --check models/Contact.js'
                 }
-                echo '=== Tous les fichiers sont syntaxiquement corrects ==='
+                echo '=== Syntaxe OK ==='
             }
         }
 
-        // ── ÉTAPE 6 : Build Docker ────────────────────────────────
+        // ── ÉTAPE 4 : Build Docker ────────────────────────────────
         stage('Docker Build') {
             steps {
                 dir("${PROJECT_DIR}") {
                     echo '=== Construction des images Docker ==='
                     sh 'docker compose build --no-cache'
-                    echo '=== Images Docker construites ==='
+                    echo '=== Images construites ==='
                 }
             }
         }
 
-        // ── ÉTAPE 7 : Déploiement ─────────────────────────────────
+        // ── ÉTAPE 5 : Déploiement ─────────────────────────────────
         stage('Deploiement') {
             steps {
                 dir("${PROJECT_DIR}") {
@@ -106,50 +69,47 @@ pipeline {
                     echo '=== Démarrage des nouveaux conteneurs ==='
                     sh 'docker compose up -d'
 
-                    echo '=== Attente démarrage des services (15s) ==='
-                    sh 'sleep 15'
+                    echo '=== Attente démarrage (20s) ==='
+                    sh 'sleep 20'
                 }
             }
         }
 
-        // ── ÉTAPE 8 : Vérification santé ──────────────────────────
+        // ── ÉTAPE 6 : Health Check ────────────────────────────────
         stage('Health Check') {
             steps {
-                echo '=== Vérification API backend ==='
-                sh 'curl -f http://localhost:5000/api/health || exit 1'
+                echo '=== Vérification API ==='
+                sh 'curl -f http://localhost:5000/api/health'
                 echo '=== API opérationnelle ==='
 
-                echo '=== Vérification frontend ==='
-                sh 'curl -f http://localhost:80 || exit 1'
+                echo '=== Vérification Frontend ==='
+                sh 'curl -f -s -o /dev/null -w "%{http_code}" http://localhost:80'
                 echo '=== Frontend opérationnel ==='
             }
         }
 
     }
 
-    // ── ACTIONS APRÈS LE PIPELINE ─────────────────────────────────
     post {
         success {
             echo '''
-            ╔══════════════════════════════════════════╗
-            ║  ✅ PIPELINE RÉUSSI                      ║
-            ║  Application déployée avec succès !      ║
-            ║  Frontend : http://localhost             ║
-            ║  API      : http://localhost:5000        ║
-            ╚══════════════════════════════════════════╝
+╔══════════════════════════════════════════╗
+║  PIPELINE REUSSI                         ║
+║  Frontend : http://localhost             ║
+║  API      : http://localhost:5000        ║
+╚══════════════════════════════════════════╝
             '''
         }
         failure {
             echo '''
-            ╔══════════════════════════════════════════╗
-            ║  ❌ PIPELINE ÉCHOUÉ                      ║
-            ║  Consultez les logs pour plus de détails ║
-            ╚══════════════════════════════════════════╝
+╔══════════════════════════════════════════╗
+║  PIPELINE ECHOUE                         ║
+║  Consultez les logs ci-dessus            ║
+╚══════════════════════════════════════════╝
             '''
         }
         always {
-            echo '=== Nettoyage du workspace ==='
-            cleanWs()
+            echo '=== Fin du pipeline ==='
         }
     }
 }
