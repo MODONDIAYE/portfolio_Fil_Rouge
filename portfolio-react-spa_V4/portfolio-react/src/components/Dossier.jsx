@@ -34,7 +34,7 @@ export default function Dossier() {
       setProjets(data);
       setErreur(null);
     } catch (e) {
-      setErreur("Impossible de joindre json-server (http://localhost:3001). Lancez : npm run server");
+      setErreur("Impossible de joindre l'API Express (http://localhost:5000). Lancez : node server.js dans backend-expressJS");
     } finally {
       setLoading(false);
     }
@@ -55,14 +55,14 @@ export default function Dossier() {
   const supprimerProjet = async (id) => {
     if (!window.confirm('Confirmer la suppression de ce projet ?')) return;
     await api.remove(id);
-    setProjets((prev) => prev.filter((p) => p.id !== id));
-    if (projetDetail?.id === id) setProjetDetail(null);
+    setProjets((prev) => prev.filter((p) => (p._id || p.id) !== id));
+    if ((projetDetail?._id || projetDetail?.id) === id) setProjetDetail(null);
   };
 
   // Mise à jour (Update)
   const mettreAJourProjet = async (id, data) => {
     const updated = await api.update(id, { ...data, id });
-    setProjets((prev) => prev.map((p) => (p.id === id ? updated : p)));
+    setProjets((prev) => prev.map((p) => ((p._id || p.id) === id ? updated : p)));
     setProjetDetail(updated);
     setModeEdition(false);
   };

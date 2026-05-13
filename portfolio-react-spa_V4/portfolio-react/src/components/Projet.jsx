@@ -43,7 +43,7 @@ export default function Projet({ projet, onSupprimer, onAfficherDetail }) {
       <div className="card-body">
         {/* Libellé = ancre cliquable qui ouvre les détails */}
         <a
-          href={`#detail-${projet.id}`}
+          href={`#detail-${projet._id || projet.id}`}
           className="card-title"
           onClick={(e) => {
             e.preventDefault();
@@ -79,7 +79,7 @@ export default function Projet({ projet, onSupprimer, onAfficherDetail }) {
           </button>
           <button
             className="btn-delete"
-            onClick={() => onSupprimer(projet.id)}
+            onClick={() => onSupprimer(projet._id || projet.id)}
             title="Supprimer ce projet"
           >
             <i className="fa-solid fa-trash" /> Supprimer

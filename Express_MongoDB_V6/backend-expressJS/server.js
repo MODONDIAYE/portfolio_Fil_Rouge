@@ -10,17 +10,22 @@ const contactRoutes = require('./routes/contact');
 const app = express();
 
 // Middlewares
+const allowedOrigins = [
+  process.env.FRONTEND_URL || 'http://localhost:5173',
+  'http://localhost:5173',
+  'http://localhost:3000',
+  'http://127.0.0.1:5173',
+];
 app.use(cors({
-  origin: process.env.FRONTEND_URL || 'http://localhost:5173',
-  credentials: true
+  origin: (origin, callback) => {
+    // Autoriser les requêtes sans origin (Postman, curl, Thunder Client)
+    if (!origin || allowedOrigins.includes(origin)) return callback(null, true);
+    callback(new Error(`CORS bloqué pour l'origine : ${origin}`));
+  },
+  credentials: true,
 }));
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
-
-// Connexion MongoDB
-mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/g2_aws_p5')
-  .then(() => console.log('MongoDB connecté'))
-  .catch(err => console.error('erreur MongoDB :', err));
 
 // Routes
 app.use('/api/projects', projectRoutes);
@@ -38,7 +43,31 @@ app.use((err, req, res, next) => {
   res.status(500).json({ message: 'Erreur serveur interne', error: process.env.NODE_ENV === 'development' ? err.message : undefined });
 });
 
+// ── Démarrage : connexion MongoDB PUIS écoute ──────────
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`🚀 Serveur démarré sur le port ${PORT}`));
+
+mongoose
+  .connect(process.env.MONGODB_URI)
+  .then(() => {
+    console.log('✅ MongoDB Atlas connecté');
+    const server = app.listen(PORT, () =>
+      console.log(`🚀 Serveur démarré sur http://localhost:${PORT}`)
+    );
+
+    // Gestion propre si le port est déjà utilisé
+    server.on('error', (err) => {
+      if (err.code === 'EADDRINUSE') {
+        console.error(`❌ Port ${PORT} déjà utilisé. Arrêtez l'autre processus et relancez.`);
+        console.error(`   → Commande : taskkill /F /IM node.exe  (Windows)`);
+      } else {
+        console.error('❌ Erreur serveur :', err.message);
+      }
+      process.exit(1);
+    });
+  })
+  .catch(err => {
+    console.error('❌ Connexion MongoDB échouée :', err.message);
+    process.exit(1);
+  });
 
 module.exports = app;

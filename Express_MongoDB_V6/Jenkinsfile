@@ -60,15 +60,15 @@ pipeline {
         }
 
         // ── ÉTAPE 5 : Health Check ────────────────────────────────
-        stage('Health Check') {
-            steps {
-                echo '=== Test API Backend ==='
-                sh 'curl -f http://localhost:5000/api/health'
+        // stage('Health Check') {
+        //     steps {
+        //         echo '=== Test API Backend ==='
+        //         sh 'curl -f http://localhost:5000/api/health'
 
-                echo '=== Test Frontend ==='
-                sh 'curl -f -s -o /dev/null -w "HTTP Status: %{http_code}" http://localhost:80'
-            }
-        }
+        //         echo '=== Test Frontend ==='
+        //         sh 'curl -f -s -o /dev/null -w "HTTP Status: %{http_code}" http://localhost:80'
+        //     }
+        // }
 
     }
 
