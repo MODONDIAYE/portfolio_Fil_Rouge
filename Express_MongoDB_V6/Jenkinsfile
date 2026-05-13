@@ -17,49 +17,33 @@ pipeline {
             steps {
                 echo '=== Récupération du code source ==='
                 checkout scm
+                echo "=== Commit : ${env.GIT_COMMIT?.take(7)} ==="
             }
         }
 
-        // ── ÉTAPE 2 : Vérifier l'environnement ───────────────────
+        // ── ÉTAPE 2 : Vérifier Docker ─────────────────────────────
         stage('Verification') {
             steps {
-                echo '=== Vérification des outils ==='
-                sh 'node --version || echo "Node non disponible"'
-                sh 'npm --version  || echo "npm non disponible"'
+                echo '=== Vérification Docker ==='
                 sh 'docker --version'
                 sh 'docker compose version'
+                sh 'docker ps --format "table {{.Names}}\\t{{.Status}}"'
             }
         }
 
-        // ── ÉTAPE 3 : Tests de syntaxe backend ───────────────────
-        stage('Tests syntaxe') {
-            steps {
-                echo '=== Vérification syntaxe Node.js ==='
-                dir("${PROJECT_DIR}/backend-expressJS") {
-                    sh 'node --check server.js'
-                    sh 'node --check controllers/projectController.js'
-                    sh 'node --check controllers/memberController.js'
-                    sh 'node --check controllers/contactController.js'
-                    sh 'node --check models/Project.js'
-                    sh 'node --check models/Member.js'
-                    sh 'node --check models/Contact.js'
-                }
-                echo '=== Syntaxe OK ==='
-            }
-        }
-
-        // ── ÉTAPE 4 : Build Docker ────────────────────────────────
+        // ── ÉTAPE 3 : Build Docker ────────────────────────────────
+        // Node.js est dans les images Docker — pas besoin de l'installer ici
         stage('Docker Build') {
             steps {
                 dir("${PROJECT_DIR}") {
                     echo '=== Construction des images Docker ==='
-                    sh 'docker compose build --no-cache'
-                    echo '=== Images construites ==='
+                    sh 'docker compose build'
+                    echo '=== Images construites avec succès ==='
                 }
             }
         }
 
-        // ── ÉTAPE 5 : Déploiement ─────────────────────────────────
+        // ── ÉTAPE 4 : Déploiement ─────────────────────────────────
         stage('Deploiement') {
             steps {
                 dir("${PROJECT_DIR}") {
@@ -69,22 +53,20 @@ pipeline {
                     echo '=== Démarrage des nouveaux conteneurs ==='
                     sh 'docker compose up -d'
 
-                    echo '=== Attente démarrage (20s) ==='
-                    sh 'sleep 20'
+                    echo '=== Attente démarrage MongoDB + Backend (25s) ==='
+                    sh 'sleep 25'
                 }
             }
         }
 
-        // ── ÉTAPE 6 : Health Check ────────────────────────────────
+        // ── ÉTAPE 5 : Health Check ────────────────────────────────
         stage('Health Check') {
             steps {
-                echo '=== Vérification API ==='
+                echo '=== Test API Backend ==='
                 sh 'curl -f http://localhost:5000/api/health'
-                echo '=== API opérationnelle ==='
 
-                echo '=== Vérification Frontend ==='
-                sh 'curl -f -s -o /dev/null -w "%{http_code}" http://localhost:80'
-                echo '=== Frontend opérationnel ==='
+                echo '=== Test Frontend ==='
+                sh 'curl -f -s -o /dev/null -w "HTTP Status: %{http_code}" http://localhost:80'
             }
         }
 
@@ -93,22 +75,23 @@ pipeline {
     post {
         success {
             echo '''
-╔══════════════════════════════════════════╗
-║  PIPELINE REUSSI                         ║
-║  Frontend : http://localhost             ║
-║  API      : http://localhost:5000        ║
-╚══════════════════════════════════════════╝
+==============================================
+  PIPELINE REUSSI - Application deployee !
+  Frontend : http://localhost
+  API      : http://localhost:5000/api/health
+==============================================
             '''
         }
         failure {
             echo '''
-╔══════════════════════════════════════════╗
-║  PIPELINE ECHOUE                         ║
-║  Consultez les logs ci-dessus            ║
-╚══════════════════════════════════════════╝
+==============================================
+  PIPELINE ECHOUE
+  Consultez les logs ci-dessus
+==============================================
             '''
         }
         always {
+            sh 'docker ps --format "table {{.Names}}\\t{{.Status}}\\t{{.Ports}}" || true'
             echo '=== Fin du pipeline ==='
         }
     }
