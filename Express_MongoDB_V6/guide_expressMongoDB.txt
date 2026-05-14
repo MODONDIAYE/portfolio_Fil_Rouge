@@ -1,0 +1,215 @@
+╔══════════════════════════════════════════════════════════════════════════════╗
+║         GUIDE COMPLET — Express_MongoDB_V6 (backend-expressJS)             ║
+║         Auteur : Modou NDIAYE  |  Date : Mai 2026                          ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ STRUCTURE DU PROJET
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Express_MongoDB_V6/
+└── backend-expressJS/
+    ├── .env                        ← Variables d'environnement (PORT, MONGODB_URI...)
+    ├── server.js                   ← Point d'entrée de l'application
+    ├── seed.js                     ← Script pour peupler la base de données
+    ├── package.json                ← Dépendances du projet
+    ├── models/
+    │   ├── Project.js              ← Schéma MongoDB pour les projets
+    │   ├── Member.js               ← Schéma MongoDB pour les membres
+    │   └── Contact.js              ← Schéma MongoDB pour les messages
+    ├── controllers/
+    │   ├── projectController.js    ← Logique métier projets (CRUD)
+    │   ├── memberController.js     ← Logique métier membres (CRUD)
+    │   └── contactController.js    ← Logique métier contact
+    └── routes/
+        ├── projects.js             ← Routes /api/projects
+        ├── members.js              ← Routes /api/members
+        └── contact.js              ← Routes /api/contact
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ ÉTAPE 1 — PRÉREQUIS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ✔ Node.js installé (vérifier : node --version)
+  ✔ npm installé   (vérifier : npm --version)
+  ✔ Compte MongoDB Atlas actif sur https://cloud.mongodb.com
+  ✔ Extension Thunder Client installée dans VS Code (pour tester l'API)
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ ÉTAPE 2 — CONFIGURATION MONGODB ATLAS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  1. Aller sur https://cloud.mongodb.com
+  2. Menu gauche → "Network Access" → "Add IP Address"
+     → Cliquer "Allow Access from Anywhere" (0.0.0.0/0) → Confirm
+  3. Menu gauche → "Database Access"
+     → Vérifier que l'utilisateur "mn2243d_db_user" existe
+     → Rôle : "Atlas Admin" ou "readWriteAnyDatabase"
+  4. Les collections (projects, members, contacts) se créent
+     automatiquement au premier appel API.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ ÉTAPE 3 — INSTALLATION ET LANCEMENT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  Ouvrir un terminal et exécuter les commandes suivantes :
+
+  # 1. Se placer dans le dossier du projet
+  cd "C:\Users\modou\OneDrive\Documents\Portfolio_ModouNDIAYE-20260329T200354Z-1-001\Express_MongoDB_V6\backend-expressJS"
+
+  # 2. Installer les dépendances (une seule fois)
+  npm install
+
+  # 3. Lancer le serveur en mode développement (avec rechargement auto)
+  npx nodemon server.js
+
+  # OU lancer en mode normal
+  node server.js
+
+  # Résultat attendu dans le terminal :
+  # 🚀 Serveur démarré sur le port 5000
+  # MongoDB connecté
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ ÉTAPE 4 — PEUPLER LA BASE (OPTIONNEL)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  # Insérer 5 membres et 5 projets de démonstration
+  node seed.js
+
+  # Résultat attendu :
+  # ✅ MongoDB connecté
+  # 🗑️  Collections vidées
+  # ✅ 5 membres insérés
+  # ✅ 5 projets insérés
+  # 🎉 Seed terminé avec succès !
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ ÉTAPE 5 — TESTER L'API (PowerShell / Thunder Client)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+ BASE URL : http://localhost:5000
+
+ ── HEALTH CHECK ──────────────────────────────────────────────────────────────
+
+  Invoke-RestMethod -Uri "http://localhost:5000/api/health" -Method GET | ConvertTo-Json
+
+ ── PROJECTS ──────────────────────────────────────────────────────────────────
+
+  # Créer un projet (POST)
+  $body = @{
+    title       = "Mon Portfolio"
+    short       = "Portfolio développeur full-stack"
+    description = "Projet fil rouge avec Express et MongoDB Atlas"
+    type        = "Web"
+    status      = "En cours"
+    tags        = @("Express.js", "MongoDB", "Node.js")
+    github      = "https://github.com/MODONDIAYE"
+    features    = @("CRUD complet", "API REST", "MongoDB Atlas")
+    awsServices = @("EC2", "S3")
+  } | ConvertTo-Json
+  Invoke-RestMethod -Uri "http://localhost:5000/api/projects" -Method POST -Body $body -ContentType "application/json" | ConvertTo-Json -Depth 5
+
+  # Récupérer tous les projets (GET)
+  Invoke-RestMethod -Uri "http://localhost:5000/api/projects" -Method GET | ConvertTo-Json -Depth 5
+
+  # Statistiques des projets (GET)
+  Invoke-RestMethod -Uri "http://localhost:5000/api/projects/stats/summary" -Method GET | ConvertTo-Json -Depth 5
+
+  # Récupérer un projet par ID (remplacer <ID> par l'_id retourné)
+  Invoke-RestMethod -Uri "http://localhost:5000/api/projects/<ID>" -Method GET | ConvertTo-Json -Depth 5
+
+  # Modifier un projet (PUT)
+  $body = @{ title = "Portfolio Modifié"; status = "Terminé" } | ConvertTo-Json
+  Invoke-RestMethod -Uri "http://localhost:5000/api/projects/<ID>" -Method PUT -Body $body -ContentType "application/json" | ConvertTo-Json -Depth 5
+
+  # Supprimer un projet (DELETE)
+  Invoke-RestMethod -Uri "http://localhost:5000/api/projects/<ID>" -Method DELETE | ConvertTo-Json
+
+ ── MEMBERS ───────────────────────────────────────────────────────────────────
+
+  # Créer un membre (POST)
+  $body = @{
+    name      = "Modou Ndiaye"
+    role      = "Full-Stack Developer"
+    specialty = "React & Node.js"
+    bio       = "Développeur passionné par le web et le cloud"
+    skills    = @("React", "Node.js", "MongoDB", "AWS")
+    github    = "https://github.com/MODONDIAYE"
+    email     = "modou2243@gmail.com"
+  } | ConvertTo-Json
+  Invoke-RestMethod -Uri "http://localhost:5000/api/members" -Method POST -Body $body -ContentType "application/json" | ConvertTo-Json -Depth 5
+
+  # Récupérer tous les membres (GET)
+  Invoke-RestMethod -Uri "http://localhost:5000/api/members" -Method GET | ConvertTo-Json -Depth 5
+
+  # Récupérer un membre par ID
+  Invoke-RestMethod -Uri "http://localhost:5000/api/members/<ID>" -Method GET | ConvertTo-Json -Depth 5
+
+  # Modifier un membre (PUT)
+  $body = @{ role = "Lead Developer" } | ConvertTo-Json
+  Invoke-RestMethod -Uri "http://localhost:5000/api/members/<ID>" -Method PUT -Body $body -ContentType "application/json" | ConvertTo-Json
+
+  # Supprimer un membre (DELETE)
+  Invoke-RestMethod -Uri "http://localhost:5000/api/members/<ID>" -Method DELETE | ConvertTo-Json
+
+ ── CONTACT ───────────────────────────────────────────────────────────────────
+
+  # Envoyer un message (POST)
+  $body = @{
+    name    = "Visiteur Test"
+    email   = "test@example.com"
+    subject = "Demande de collaboration"
+    message = "Bonjour, je souhaite collaborer avec vous."
+  } | ConvertTo-Json
+  Invoke-RestMethod -Uri "http://localhost:5000/api/contact" -Method POST -Body $body -ContentType "application/json" | ConvertTo-Json
+
+  # Lister tous les messages (GET)
+  Invoke-RestMethod -Uri "http://localhost:5000/api/contact" -Method GET | ConvertTo-Json -Depth 5
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ TABLEAU RÉCAPITULATIF DES ROUTES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  Méthode  | Route                          | Action
+  ---------|--------------------------------|---------------------------
+  GET      | /api/health                    | Vérifier l'état du serveur
+  ---------|--------------------------------|---------------------------
+  POST     | /api/projects                  | Créer un projet
+  GET      | /api/projects                  | Tous les projets
+  GET      | /api/projects/stats/summary    | Statistiques
+  GET      | /api/projects/:id              | Un projet par ID
+  PUT      | /api/projects/:id              | Modifier un projet
+  DELETE   | /api/projects/:id              | Supprimer un projet
+  ---------|--------------------------------|---------------------------
+  POST     | /api/members                   | Créer un membre
+  GET      | /api/members                   | Tous les membres
+  GET      | /api/members/:id               | Un membre par ID
+  PUT      | /api/members/:id               | Modifier un membre
+  DELETE   | /api/members/:id               | Supprimer un membre
+  ---------|--------------------------------|---------------------------
+  POST     | /api/contact                   | Envoyer un message
+  GET      | /api/contact                   | Lister les messages
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ CODES DE RÉPONSE HTTP
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  200 → Succès (GET, PUT, DELETE)
+  201 → Créé avec succès (POST)
+  400 → Données invalides (champ manquant ou mauvais format)
+  404 → Ressource non trouvée (mauvais ID)
+  500 → Erreur serveur interne
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ VARIABLES D'ENVIRONNEMENT (.env)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  PORT         → Port d'écoute du serveur (5000)
+  MONGODB_URI  → Chaîne de connexion MongoDB Atlas
+  JWT_SECRET   → Clé secrète pour les tokens JWT
+  NODE_ENV     → Environnement (development / production)
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ FIN DU GUIDE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
