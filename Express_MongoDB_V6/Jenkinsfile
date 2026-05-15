@@ -91,9 +91,16 @@ pipeline {
             steps {
                 echo '=== ETAPE 5 : Verification de l application ==='
                 echo '    Test API Backend (depuis le conteneur portfolio_backend)...'
-                sh 'docker exec portfolio_backend wget --spider -q http://localhost:5000/api/health'
+                sh 'docker exec portfolio_backend wget --spider -q http://127.0.0.1:5000/api/health'
                 echo '    Test Frontend React (depuis le conteneur portfolio_frontend)...'
-                sh 'docker exec portfolio_frontend wget --spider -q http://localhost:80'
+                sh '''
+                    for i in 1 2 3 4 5; do
+                        docker exec portfolio_frontend wget --spider -q http://127.0.0.1:80 && exit 0
+                        echo "    Tentative $i echouee, retry dans 5s..."
+                        sleep 5
+                    done
+                    exit 1
+                '''
                 echo '=== Application operationnelle ==='
             }
         }
