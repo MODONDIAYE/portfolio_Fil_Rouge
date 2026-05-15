@@ -52,7 +52,7 @@ pipeline {
         stage('Docker Build') {
             steps {
                 echo '=== ETAPE 3 : Construction des images Docker ==='
-                sh "docker compose -f ${WORKSPACE}//docker-compose.yml build"
+                sh "docker compose -f ${WORKSPACE}/${PROJECT_DIR}/docker-compose.yml build"
                 echo '=== Images construites avec succes ==='
             }
         }
@@ -68,9 +68,9 @@ pipeline {
             steps {
                 echo '=== ETAPE 4 : Deploiement des conteneurs ==='
                 echo '    Arret des anciens conteneurs...'
-                sh "docker compose -f ${WORKSPACE}//docker-compose.yml down || true"
+                sh "docker compose -f ${WORKSPACE}/${PROJECT_DIR}/docker-compose.yml down || true"
                 echo '    Demarrage des nouveaux conteneurs (-d = arriere-plan)...'
-                sh "docker compose -f ${WORKSPACE}//docker-compose.yml up -d"
+                sh "docker compose -f ${WORKSPACE}/${PROJECT_DIR}/docker-compose.yml up -d"
                 echo '    Attente demarrage MongoDB + Backend (30s)...'
                 sh 'sleep 30'
             }
