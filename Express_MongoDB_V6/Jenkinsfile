@@ -5,6 +5,10 @@ pipeline {
         PROJECT_DIR = 'Express_MongoDB_V6'
     }
 
+    triggers {
+        githubPush()
+    }
+
     options {
         timeout(time: 20, unit: 'MINUTES')
         buildDiscarder(logRotator(numToKeepStr: '5'))
