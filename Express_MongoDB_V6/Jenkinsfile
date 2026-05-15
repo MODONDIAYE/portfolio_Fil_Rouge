@@ -1,46 +1,10 @@
-﻿/*
- * ============================================================
- *  JENKINSFILE — Pipeline CI/CD Portfolio Modou NDIAYE V6
- * ============================================================
- *  Projet   : Express_MongoDB_V6
- *  Stack    : Express.js · React · MongoDB · Docker
- *  Dépôt    : https://github.com/MODONDIAYE/portfolio_Fil_Rouge
- *  Auteur   : Modou NDIAYE
- *
- *  Ce pipeline automatise le cycle de vie complet de l application :
- *  1. Récupération du code source depuis GitHub
- *  2. Vérification de l environnement Docker
- *  3. Construction des images Docker (backend + frontend)
- *  4. Déploiement des conteneurs via docker compose
- *  5. Vérification que l application répond correctement
- *
- *  Déclenchement : manuel (Build Now) ou automatique via webhook GitHub
- * ============================================================
- */
-
 pipeline {
-
-    /*
-     * agent any
-     * Jenkins peut exécuter ce pipeline sur n importe quel agent disponible.
-     * Dans notre cas : le conteneur jenkins_portfolio.
-     */
     agent any
 
-    /*
-     * environment { }
-     * Variables d environnement disponibles dans tout le pipeline.
-     * PROJECT_DIR pointe vers le sous-dossier de l application fullstack.
-     */
     environment {
         PROJECT_DIR = 'Express_MongoDB_V6'
     }
 
-    /*
-     * options { }
-     * - timeout     : arrête le pipeline après 20 min (évite les builds bloqués)
-     * - buildDiscarder : conserve uniquement les 5 derniers builds (économise l espace)
-     */
     options {
         timeout(time: 20, unit: 'MINUTES')
         buildDiscarder(logRotator(numToKeepStr: '5'))
@@ -48,26 +12,22 @@ pipeline {
 
     stages {
 
-        /*
-         * STAGE 1 — Checkout
-         * Récupère le code source depuis GitHub.
-         * "checkout scm" utilise la config Git du job Jenkins (URL, branche, credentials).
-         * env.GIT_COMMIT contient le hash SHA du commit (.take(7) = 7 premiers caractères).
-         */
+        // ETAPE 1 : Checkout
+        // Recupere le code source depuis GitHub via la config Git du job Jenkins.
+        // checkout scm utilise l URL, la branche et les credentials du job.
+        // env.GIT_COMMIT = hash SHA du commit (.take(7) = 7 premiers caracteres).
         stage('Checkout') {
             steps {
                 echo '=== ETAPE 1 : Recuperation du code source depuis GitHub ==='
                 checkout scm
-                echo "=== Commit recupere : ${env.GIT_COMMIT?.take(7)} ==="
+                echo "=== Commit : ${env.GIT_COMMIT?.take(7)} ==="
             }
         }
 
-        /*
-         * STAGE 2 — Verification
-         * Vérifie que Docker est disponible dans le conteneur Jenkins.
-         * Node.js n est PAS nécessaire ici : le build se fait DANS les images Docker.
-         * "docker ps" liste les conteneurs actifs avant le déploiement.
-         */
+        // ETAPE 2 : Verification
+        // Verifie que Docker est disponible dans le conteneur Jenkins.
+        // Node.js n est PAS installe dans Jenkins : le build se fait DANS les images Docker.
+        // Jenkins n a besoin que de Docker pour orchestrer le deploiement.
         stage('Verification') {
             steps {
                 echo '=== ETAPE 2 : Verification de l environnement Docker ==='
@@ -77,134 +37,73 @@ pipeline {
             }
         }
 
-        /*
-         * STAGE 3 — Docker Build
-         * Construit les images Docker pour le backend et le frontend.
-         *
-         * docker compose build lit le docker-compose.yml et construit :
-         *   - Backend  : node:20-alpine + Express.js (npm install + node server.js)
-         *   - Frontend : node:20-alpine (npm run build) + nginx:alpine (sert dist/)
-         *
-         * Le cache Docker est utilisé : si le code n a pas changé, la couche
-         * est réutilisée → build plus rapide.
-         *
-         * dir("${PROJECT_DIR}") se place dans Express_MongoDB_V6/
-         * où se trouve le docker-compose.yml.
-         */
+        // ETAPE 3 : Docker Build
+        // Construit les images Docker pour le backend et le frontend.
+        // docker compose build lit le docker-compose.yml et construit :
+        //   - Backend  : node:20-alpine + Express.js
+        //   - Frontend : node:20-alpine (npm run build) + nginx:alpine (sert dist/)
+        // Le cache Docker est utilise si le code n a pas change -> build plus rapide.
+        // dir(PROJECT_DIR) se place dans Express_MongoDB_V6/ ou est le docker-compose.yml.
         stage('Docker Build') {
             steps {
                 dir("${PROJECT_DIR}") {
                     echo '=== ETAPE 3 : Construction des images Docker ==='
-                    echo '    Backend  : node:20-alpine + Express.js'
-                    echo '    Frontend : node:20-alpine (build) + nginx:alpine (serve)'
                     sh 'docker compose build'
-                    echo '=== Images Docker construites avec succes ==='
+                    echo '=== Images construites avec succes ==='
                 }
             }
         }
 
-        /*
-         * STAGE 4 — Deploiement
-         * Arrête les anciens conteneurs et démarre les nouveaux.
-         *
-         * Stratégie Rolling Update :
-         *   1. docker compose down  → arrête les conteneurs (volume MongoDB conservé)
-         *   2. docker compose up -d → démarre les nouveaux en arrière-plan (-d)
-         *
-         * "|| true" : évite une erreur si aucun conteneur ne tourne (1er déploiement).
-         *
-         * "sleep 25" : MongoDB met ~10-15s à démarrer et passer le healthcheck.
-         * Le backend attend que MongoDB soit healthy avant de se connecter.
-         * On attend 25s pour garantir que tout est prêt avant le health check.
-         *
-         * Conteneurs démarrés :
-         *   - portfolio_mongodb  (port 27017) : base de données
-         *   - portfolio_backend  (port 5000)  : API Express.js
-         *   - portfolio_frontend (port 80)    : React servi par Nginx
-         */
+        // ETAPE 4 : Deploiement
+        // Arrete les anciens conteneurs et demarre les nouveaux (Rolling Update).
+        // docker compose down  -> arrete les conteneurs (volume MongoDB conserve)
+        // docker compose up -d -> demarre les nouveaux en arriere-plan
+        // || true : evite une erreur si aucun conteneur ne tourne (1er deploiement)
+        // sleep 25 : attend que MongoDB soit healthy et que le backend se connecte
+        // Conteneurs : portfolio_mongodb (27017), portfolio_backend (5000), portfolio_frontend (80)
         stage('Deploiement') {
             steps {
                 dir("${PROJECT_DIR}") {
                     echo '=== ETAPE 4 : Deploiement des conteneurs ==='
-
-                    echo '    Arret des anciens conteneurs...'
+                    echo '    Arret des anciens conteneurs (|| true = ok si aucun ne tourne)...'
                     sh 'docker compose down || true'
-
                     echo '    Demarrage des nouveaux conteneurs (-d = arriere-plan)...'
                     sh 'docker compose up -d'
-
-                    echo '    Attente du demarrage complet (25 secondes)...'
+                    echo '    Attente demarrage MongoDB + Backend (25s)...'
                     sh 'sleep 25'
                 }
             }
         }
 
-        /*
-         * STAGE 5 — Health Check
-         * Vérifie que l application est opérationnelle après le déploiement.
-         *
-         * Test 1 — API Backend :
-         *   curl -f http://localhost:5000/api/health
-         *   -f : retourne une erreur si le code HTTP n est pas 2xx
-         *   Réponse attendue : { status: "OK", message: "API operationnelle" }
-         *
-         * Test 2 — Frontend :
-         *   curl -f -s -o /dev/null -w "HTTP Status: %{http_code}" http://localhost:80
-         *   -s : mode silencieux
-         *   -o /dev/null : ignore le contenu HTML
-         *   -w "%{http_code}" : affiche uniquement le code HTTP (200 = OK)
-         *
-         * Si un test échoue → pipeline FAILURE → notification envoyée.
-         */
+        // ETAPE 5 : Health Check
+        // Verifie que l application repond apres le deploiement.
+        // curl -f : erreur si code HTTP != 2xx
+        // curl -s -o /dev/null -w HTTP_CODE : affiche uniquement le code HTTP (200 = OK)
         stage('Health Check') {
             steps {
                 echo '=== ETAPE 5 : Verification de l application ==='
-
                 echo '    Test API Backend (port 5000)...'
                 sh 'curl -f http://localhost:5000/api/health'
-
                 echo '    Test Frontend React via Nginx (port 80)...'
                 sh 'curl -f -s -o /dev/null -w "HTTP Status: %{http_code}" http://localhost:80'
-
                 echo '=== Application operationnelle ==='
             }
         }
 
     }
 
-    /*
-     * post { }
-     * Actions exécutées APRÈS la fin du pipeline.
-     *
-     * success : tous les stages ont réussi
-     * failure : au moins un stage a échoué
-     * always  : exécuté dans tous les cas (affiche l état des conteneurs)
-     */
+    // post : actions apres la fin du pipeline
+    // success : tous les stages ont reussi
+    // failure : au moins un stage a echoue
+    // always  : execute dans tous les cas (affiche l etat des conteneurs)
     post {
-
         success {
-            echo '''
-==============================================
-  PIPELINE REUSSI - Application deployee !
-  Frontend : http://localhost
-  API      : http://localhost:5000/api/health
-  MongoDB  : localhost:27017
-==============================================
-            '''
+            echo '=== PIPELINE REUSSI - Application deployee ! Frontend: http://localhost | API: http://localhost:5000/api/health ==='
         }
-
         failure {
-            echo '''
-==============================================
-  PIPELINE ECHOUE
-  Consultez les logs ci-dessus pour identifier
-  le stage en erreur et corriger le probleme.
-==============================================
-            '''
+            echo '=== PIPELINE ECHOUE - Consultez les logs ci-dessus pour identifier le stage en erreur ==='
         }
-
         always {
-            // Affiche l etat final de tous les conteneurs pour diagnostic
             sh 'docker ps --format "table {{.Names}}\\t{{.Status}}\\t{{.Ports}}" || true'
             echo '=== Fin du pipeline ==='
         }
