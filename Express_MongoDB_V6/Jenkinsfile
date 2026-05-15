@@ -91,9 +91,9 @@ pipeline {
             steps {
                 echo '=== ETAPE 5 : Verification de l application ==='
                 echo '    Test API Backend (depuis le conteneur portfolio_backend)...'
-                sh 'docker exec portfolio_backend curl -f http://localhost:5000/api/health'
+                sh 'docker exec portfolio_backend wget --spider -q http://localhost:5000/api/health'
                 echo '    Test Frontend React (depuis le conteneur portfolio_frontend)...'
-                sh 'docker exec portfolio_frontend curl -f -s -o /dev/null -w "HTTP Status: %{http_code}" http://localhost:80'
+                sh 'docker exec portfolio_frontend wget --spider -q http://localhost:80'
                 echo '=== Application operationnelle ==='
             }
         }
