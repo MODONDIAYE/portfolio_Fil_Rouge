@@ -3,6 +3,9 @@ pipeline {
 
     environment {
         PROJECT_DIR = 'Express_MongoDB_V6'
+        DOCKERHUB_USER = 'modoundiaye'
+        BACKEND_IMAGE = 'modoundiaye/portfolio-backend'
+        FRONTEND_IMAGE = 'modoundiaye/portfolio-frontend'
     }
 
     triggers {
@@ -61,7 +64,31 @@ pipeline {
             }
         }
 
-        // ETAPE 4 : Deploiement
+        // ETAPE 4 : Push Docker Hub
+        // Tag les images buildees et les pousse vers Docker Hub.
+        // Utilise un credential Jenkins 'dockerhub-credentials' (Username/Password).
+        stage('Push Docker Hub') {
+            steps {
+                echo '=== ETAPE 4 : Push des images vers Docker Hub ==='
+                withCredentials([usernamePassword(credentialsId: 'dockerhub-credentials', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
+                    sh '''
+                        echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
+                        docker tag express_mongodb_v6-backend:latest ${BACKEND_IMAGE}:latest
+                        docker tag express_mongodb_v6-backend:latest ${BACKEND_IMAGE}:${BUILD_NUMBER}
+                        docker tag express_mongodb_v6-frontend:latest ${FRONTEND_IMAGE}:latest
+                        docker tag express_mongodb_v6-frontend:latest ${FRONTEND_IMAGE}:${BUILD_NUMBER}
+                        docker push ${BACKEND_IMAGE}:latest
+                        docker push ${BACKEND_IMAGE}:${BUILD_NUMBER}
+                        docker push ${FRONTEND_IMAGE}:latest
+                        docker push ${FRONTEND_IMAGE}:${BUILD_NUMBER}
+                        docker logout
+                    '''
+                }
+                echo '=== Images poussees vers Docker Hub ==='
+            }
+        }
+
+        // ETAPE 5 : Deploiement
         // Arrete les anciens conteneurs et demarre les nouveaux (Rolling Update).
         // docker compose down  -> arrete les conteneurs (volume MongoDB conserve)
         // docker compose up -d -> demarre les nouveaux en arriere-plan
@@ -70,7 +97,7 @@ pipeline {
         // Conteneurs : portfolio_mongodb (27017), portfolio_backend (5000), portfolio_frontend (80)
         stage('Deploiement') {
             steps {
-                echo '=== ETAPE 4 : Deploiement des conteneurs ==='
+                echo '=== ETAPE 5 : Deploiement des conteneurs ==='
                 echo '    Arret des anciens conteneurs...'
                 sh "docker compose -f ${WORKSPACE}/${PROJECT_DIR}/docker-compose.yml down || true"
                 echo '    Demarrage des nouveaux conteneurs (-d = arriere-plan)...'
@@ -80,7 +107,7 @@ pipeline {
             }
         }
 
-        // ETAPE 5 : Health Check
+        // ETAPE 6 : Health Check
         // Verifie que l application repond apres le deploiement.
         //
         // IMPORTANT : Jenkins tourne dans son propre conteneur Docker.
@@ -93,7 +120,7 @@ pipeline {
         //   -> localhost:5000 est valide DANS ce conteneur
         stage('Health Check') {
             steps {
-                echo '=== ETAPE 5 : Verification de l application ==='
+                echo '=== ETAPE 6 : Verification de l application ==='
                 echo '    Test API Backend (depuis le conteneur portfolio_backend)...'
                 sh 'docker exec portfolio_backend wget --spider -q http://127.0.0.1:5000/api/health'
                 echo '    Test Frontend React (depuis le conteneur portfolio_frontend)...'
