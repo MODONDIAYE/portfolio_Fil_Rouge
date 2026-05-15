@@ -46,7 +46,7 @@ pipeline {
         // dir(PROJECT_DIR) se place dans Express_MongoDB_V6/ ou est le docker-compose.yml.
         stage('Docker Build') {
             steps {
-                dir("${PROJECT_DIR}") {
+                dir("") {
                     echo '=== ETAPE 3 : Construction des images Docker ==='
                     sh 'docker compose build'
                     echo '=== Images construites avec succes ==='
@@ -63,9 +63,9 @@ pipeline {
         // Conteneurs : portfolio_mongodb (27017), portfolio_backend (5000), portfolio_frontend (80)
         stage('Deploiement') {
             steps {
-                dir("${PROJECT_DIR}") {
+                dir("") {
                     echo '=== ETAPE 4 : Deploiement des conteneurs ==='
-                    echo '    Arret des anciens conteneurs (|| true = ok si aucun ne tourne)...'
+                    echo '    Arret des anciens conteneurs...'
                     sh 'docker compose down || true'
                     echo '    Demarrage des nouveaux conteneurs (-d = arriere-plan)...'
                     sh 'docker compose up -d'
@@ -77,15 +77,31 @@ pipeline {
 
         // ETAPE 5 : Health Check
         // Verifie que l application repond apres le deploiement.
-        // curl -f : erreur si code HTTP != 2xx
-        // curl -s -o /dev/null -w HTTP_CODE : affiche uniquement le code HTTP (200 = OK)
+        //
+        // IMPORTANT : Jenkins tourne dans son propre conteneur Docker.
+        // "localhost" dans Jenkins ne pointe PAS vers le backend.
+        // On utilise "docker exec" pour executer curl DEPUIS le conteneur backend
+        // lui-meme, ce qui garantit que l API est bien accessible.
+        //
+        // docker exec portfolio_backend curl -f http://localhost:5000/api/health
+        //   -> execute curl a l interieur du conteneur portfolio_backend
+        //   -> localhost:5000 est valide DANS ce conteneur
+        //
+        // docker exec portfolio_frontend curl -f http://localhost:80
+        //   -> execute curl a l interieur du conteneur portfolio_frontend (Nginx)
+        //   -> verifie que Nginx sert bien les fichiers React
         stage('Health Check') {
             steps {
                 echo '=== ETAPE 5 : Verification de l application ==='
-                echo '    Test API Backend (port 5000)...'
-                sh 'curl -f http://localhost:5000/api/health'
-                echo '    Test Frontend React via Nginx (port 80)...'
-                sh 'curl -f -s -o /dev/null -w "HTTP Status: %{http_code}" http://localhost:80'
+
+                // Test API : curl execute DANS le conteneur backend
+                echo '    Test API Backend (depuis le conteneur portfolio_backend)...'
+                sh 'docker exec portfolio_backend curl -f http://localhost:5000/api/health'
+
+                // Test Frontend : curl execute DANS le conteneur frontend (Nginx)
+                echo '    Test Frontend React (depuis le conteneur portfolio_frontend)...'
+                sh 'docker exec portfolio_frontend curl -f -s -o /dev/null -w "HTTP Status: %{http_code}" http://localhost:80'
+
                 echo '=== Application operationnelle ==='
             }
         }
