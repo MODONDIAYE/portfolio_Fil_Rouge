@@ -40,7 +40,7 @@ pipeline {
             steps {
                 dir("${PROJECT_DIR}") {
                     echo '=== ETAPE 4 : Deploiement ==='
-                    sh 'docker compose down --remove-orphans || true'
+                    sh 'docker compose down || true'
                     sh 'docker rm -f portfolio_mongodb portfolio_backend portfolio_frontend || true'
                     sh 'docker compose up -d'
                     sh 'sleep 25'
@@ -61,13 +61,33 @@ pipeline {
                 echo '=== Tests termines ==='
             }
         }
+        stage('Start SonarQube') {
+            steps {
+                dir("${PROJECT_DIR}") {
+                    echo '=== ETAPE 7a : Demarrage SonarQube ==='
+                    sh 'docker compose -f docker-compose.sonar.yml up -d'
+                    sh '''
+                        echo "Attente SonarQube..."
+                        for i in $(seq 1 30); do
+                            if docker exec sonarqube_portfolio curl -s http://localhost:9000/api/system/status | grep -q '"status":"UP"'; then
+                                echo "SonarQube pret"
+                                break
+                            fi
+                            sleep 5
+                        done
+                    '''
+                }
+            }
+        }
         stage('SonarQube Analysis') {
             steps {
                 dir("${PROJECT_DIR}") {
-                    echo '=== ETAPE 7 : Analyse SonarQube ==='
+                    echo '=== ETAPE 7b : Analyse SonarQube ==='
                     sh '''
+                        SONAR_NETWORK=$(docker inspect sonarqube_portfolio --format '{{range $k,$v := .NetworkSettings.Networks}}{{$k}}{{end}}')
+                        echo "SonarQube network: $SONAR_NETWORK"
                         docker run --rm \
-                            --network portfolio-v6-pipeline_sonar_network \
+                            --network "$SONAR_NETWORK" \
                             -v "$(pwd):/usr/src" \
                             -w /usr/src \
                             sonarsource/sonar-scanner-cli \
