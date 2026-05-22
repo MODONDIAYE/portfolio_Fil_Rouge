@@ -32,7 +32,7 @@ pipeline {
             steps {
                 dir("${PROJECT_DIR}") {
                     echo '=== ETAPE 3 : Docker Build ==='
-                    sh 'docker compose -p portfolio build'
+                    sh 'docker compose -f docker-compose.yml -p portfolio build'
                     echo '=== Images construites ==='
                 }
             }
@@ -45,11 +45,11 @@ pipeline {
                         echo "--- Arret de tous les conteneurs portfolio ---"
                         docker stop portfolio_mongodb portfolio_backend portfolio_frontend 2>/dev/null || true
                         docker rm -f portfolio_mongodb portfolio_backend portfolio_frontend 2>/dev/null || true
-                        docker ps -a --filter "name=portfolio_mongodb" --filter "name=portfolio_backend" --filter "name=portfolio_frontend" -q | xargs -r docker rm -f 2>/dev/null || true
-                        echo "--- Conteneurs nettoyes ---"
-                        docker network rm express_mongodb_v6_portfolio_network 2>/dev/null || true
-                        docker network rm portfolio_portfolio_network 2>/dev/null || true
-                        docker compose -p portfolio up -d
+                        sleep 2
+                        echo "--- Verification apres suppression ---"
+                        docker ps -a --filter "name=portfolio_" --format "{{.ID}} {{.Names}} {{.Status}}"
+                        echo "--- Lancement docker compose ---"
+                        docker compose -f docker-compose.yml -p portfolio up -d --force-recreate --remove-orphans
                     '''
                     sh 'sleep 25'
                 }
