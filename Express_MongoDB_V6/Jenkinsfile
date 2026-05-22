@@ -4,6 +4,8 @@ pipeline {
         PROJECT_DIR    = 'Express_MongoDB_V6'
         BACKEND_IMAGE  = 'modoundiaye/portfolio-backend'
         FRONTEND_IMAGE = 'modoundiaye/portfolio-frontend'
+        SONAR_HOST_URL = 'http://sonarqube_portfolio:9000'
+        SONAR_TOKEN    = credentials('sonarqube-token')
     }
     triggers { githubPush() }
     options {
@@ -26,43 +28,10 @@ pipeline {
                 sh 'docker ps --format "table {{.Names}}\\t{{.Status}}"'
             }
         }
-        stage('Tests') {
-            steps {
-                echo '=== ETAPE 3 : Tests Jest (via docker exec) ==='
-                // npm n est pas installe dans Jenkins.
-                // On execute les tests DANS le conteneur portfolio_backend
-                // qui a Node.js et npm disponibles.
-                sh 'docker exec portfolio_backend sh -c "cd /app && npm run test:coverage || true"'
-                echo '=== Tests termines ==='
-            }
-        }
-        stage('SonarQube Analysis') {
-            steps {
-                dir("${PROJECT_DIR}") {
-                    echo '=== ETAPE 4 : Analyse SonarQube ==='
-                    script {
-                        withSonarQubeEnv('SonarQube-Local') {
-                            def scannerHome = tool 'SonarScanner'
-                            sh "${scannerHome}/bin/sonar-scanner -Dsonar.projectKey=portfolio-v6 -Dsonar.sources=backend-expressJS,frontend-react/src -Dsonar.exclusions=**/node_modules/**,**/dist/**,**/coverage/** -Dsonar.javascript.lcov.reportPaths=backend-expressJS/coverage/lcov.info -Dsonar.sourceEncoding=UTF-8"
-                        }
-                    }
-                    echo '=== Analyse SonarQube terminee ==='
-                }
-            }
-        }
-        stage('Quality Gate') {
-            steps {
-                echo '=== ETAPE 5 : Quality Gate ==='
-                timeout(time: 5, unit: 'MINUTES') {
-                    waitForQualityGate abortPipeline: true
-                }
-                echo '=== Quality Gate : PASSED ==='
-            }
-        }
         stage('Docker Build') {
             steps {
                 dir("${PROJECT_DIR}") {
-                    echo '=== ETAPE 6 : Docker Build ==='
+                    echo '=== ETAPE 3 : Docker Build ==='
                     sh 'docker compose build'
                     echo '=== Images construites ==='
                 }
@@ -71,7 +40,7 @@ pipeline {
         stage('Deploiement') {
             steps {
                 dir("${PROJECT_DIR}") {
-                    echo '=== ETAPE 7 : Deploiement ==='
+                    echo '=== ETAPE 4 : Deploiement ==='
                     sh 'docker compose down || true'
                     sh 'docker compose up -d'
                     sh 'sleep 25'
@@ -80,9 +49,58 @@ pipeline {
         }
         stage('Health Check') {
             steps {
-                echo '=== ETAPE 8 : Health Check ==='
+                echo '=== ETAPE 5 : Health Check ==='
                 sh 'docker exec portfolio_backend wget --spider -q http://127.0.0.1:5000/api/health'
                 echo '=== Application operationnelle ==='
+            }
+        }
+        stage('Tests') {
+            steps {
+                echo '=== ETAPE 6 : Tests Jest (via docker exec) ==='
+                sh 'docker exec portfolio_backend sh -c "cd /app && npm run test:coverage"'
+                echo '=== Tests termines ==='
+            }
+        }
+        stage('SonarQube Analysis') {
+            steps {
+                dir("${PROJECT_DIR}") {
+                    echo '=== ETAPE 7 : Analyse SonarQube ==='
+                    sh '''
+                        docker run --rm \
+                            --network portfolio-v6-pipeline_sonar_network \
+                            -v "$(pwd):/usr/src" \
+                            -w /usr/src \
+                            sonarsource/sonar-scanner-cli \
+                            -Dsonar.host.url=http://sonarqube_portfolio:9000 \
+                            -Dsonar.token=${SONAR_TOKEN} \
+                            -Dsonar.projectKey=portfolio-v6 \
+                            -Dsonar.projectName="Portfolio Express MongoDB V6" \
+                            -Dsonar.sources=backend-expressJS,frontend-react/src \
+                            -Dsonar.exclusions="**/node_modules/**,**/dist/**,**/coverage/**" \
+                            -Dsonar.javascript.lcov.reportPaths=backend-expressJS/coverage/lcov.info \
+                            -Dsonar.sourceEncoding=UTF-8
+                    '''
+                    echo '=== Analyse SonarQube terminee ==='
+                }
+            }
+        }
+        stage('Quality Gate') {
+            steps {
+                echo '=== ETAPE 8 : Quality Gate ==='
+                timeout(time: 2, unit: 'MINUTES') {
+                    sh '''
+                        sleep 10
+                        STATUS=$(docker exec sonarqube_portfolio curl -s -u ${SONAR_TOKEN}: \
+                            "http://localhost:9000/api/qualitygates/project_status?projectKey=portfolio-v6" \
+                            | grep -o '"status":"[^"]*"' | head -1 | cut -d'"' -f4)
+                        echo "Quality Gate Status: $STATUS"
+                        if [ "$STATUS" != "OK" ] && [ "$STATUS" != "NONE" ]; then
+                            echo "Quality Gate FAILED"
+                            exit 1
+                        fi
+                    '''
+                }
+                echo '=== Quality Gate : PASSED ==='
             }
         }
     }
