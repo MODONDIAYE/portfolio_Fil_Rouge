@@ -36,9 +36,8 @@ services:
     environment:
       PORT: 5000
       NODE_ENV: production
-      # ⚠️ "mongodb" = nom du service ci-dessus (pas localhost !)
       MONGODB_URI: "mongodb://mn2243d_db_user:P%40sser123@mongodb:27017/portfolio_db?authSource=admin"
-      JWT_SECRET: votre_secret_jwt_tres_securise_ici
+      # JWT_SECRET: 
       FRONTEND_URL: "http://localhost"
     depends_on:
       mongodb:

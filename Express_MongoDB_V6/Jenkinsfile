@@ -1,263 +1,87 @@
 pipeline {
     agent any
-
     environment {
-        PROJECT_DIR = 'Express_MongoDB_V6'
-
-        // Nom d utilisateur du compte Docker Hub de Modou NDIAYE.
-        // Utilise pour tagger les images avant de les pousser.
-        // Profil public : https://hub.docker.com/u/modoundiaye
-        DOCKERHUB_USER = 'modoundiaye'
-
-        // Nom complet de l image Docker du backend sur Docker Hub.
-        // Format obligatoire Docker Hub : utilisateur/nom-image
-        // Commande pour recuperer l image : docker pull modoundiaye/portfolio-backend
-        BACKEND_IMAGE = 'modoundiaye/portfolio-backend'
-
-        // Nom complet de l image Docker du frontend sur Docker Hub.
-        // Commande pour recuperer l image : docker pull modoundiaye/portfolio-frontend
+        PROJECT_DIR    = 'Express_MongoDB_V6'
+        BACKEND_IMAGE  = 'modoundiaye/portfolio-backend'
         FRONTEND_IMAGE = 'modoundiaye/portfolio-frontend'
     }
-
-    // ----------------------------------------------------------------
-    // triggers { }
-    // ----------------------------------------------------------------
-    // Definit les evenements qui declenchent automatiquement le pipeline.
-    // Sans triggers, le pipeline ne se lance QUE manuellement (bouton "Build Now").
-    triggers {
-
-        // githubPush() : declenche le pipeline a chaque "git push" sur GitHub.
-        // Mecanisme : GitHub envoie une requete HTTP (webhook) a Jenkins.
-        // Jenkins recoit la notification et lance automatiquement le pipeline.
-        // Prerequis :
-        //   1. Plugin "GitHub Integration" installe dans Jenkins
-        //   2. Webhook configure dans GitHub :
-        //      Repository > Settings > Webhooks > Add webhook
-        //      Payload URL : http://<adresse-jenkins>/github-webhook/
-        //      Content type : application/json
-        //      Events : Just the push event
-        githubPush()
-    }
-
-    // ----------------------------------------------------------------
-    // options { }
-    // ----------------------------------------------------------------
-    // Configure le comportement global du pipeline.
-    // Ces options s appliquent a l ensemble du pipeline.
+    triggers { githubPush() }
     options {
-        timeout(time: 20, unit: 'MINUTES')
+        timeout(time: 30, unit: 'MINUTES')
         buildDiscarder(logRotator(numToKeepStr: '5'))
     }
-
     stages {
-        // ── ÉTAPE 1 : Récupérer le code ──────────────────────────
         stage('Checkout') {
             steps {
-                echo '=== Récupération du code source ==='
+                echo '=== ETAPE 1 : Checkout ==='
                 checkout scm
                 echo "=== Commit : ${env.GIT_COMMIT?.take(7)} ==="
             }
         }
-
-        // ── ÉTAPE 2 : Vérifier Docker ─────────────────────────────
         stage('Verification') {
             steps {
-                echo '=== Vérification Docker ==='
+                echo '=== ETAPE 2 : Verification Docker ==='
                 sh 'docker --version'
                 sh 'docker compose version'
                 sh 'docker ps --format "table {{.Names}}\\t{{.Status}}"'
             }
         }
-
-        // ── ÉTAPE 3 : Build Docker ────────────────────────────────
-        stage('Docker Build') {
+        stage('Tests') {
             steps {
-                dir("${PROJECT_DIR}") {
-                    echo '=== Construction des images Docker ==='
-                    sh 'docker compose build'
-                    echo '=== Images construites avec succès ==='
+                dir("${PROJECT_DIR}/backend-expressJS") {
+                    echo '=== ETAPE 3 : Tests Jest ==='
+                    sh 'npm install'
+                    sh 'npm run test:coverage || true'
                 }
             }
         }
-
-        // ── ÉTAPE 4 : Déploiement ─────────────────────────────────
+        stage('SonarQube Analysis') {
+            steps {
+                dir("${PROJECT_DIR}") {
+                    echo '=== ETAPE 4 : Analyse SonarQube ==='
+                    withSonarQubeEnv('SonarQube-Local') {
+                        def scannerHome = tool 'SonarScanner'
+                        sh "${scannerHome}/bin/sonar-scanner -Dsonar.projectKey=portfolio-v6 -Dsonar.sources=backend-expressJS,frontend-react/src -Dsonar.exclusions=**/node_modules/**,**/dist/**,**/coverage/** -Dsonar.javascript.lcov.reportPaths=backend-expressJS/coverage/lcov.info -Dsonar.sourceEncoding=UTF-8"
+                    }
+                }
+            }
+        }
+        stage('Quality Gate') {
+            steps {
+                echo '=== ETAPE 5 : Quality Gate ==='
+                timeout(time: 5, unit: 'MINUTES') {
+                    waitForQualityGate abortPipeline: true
+                }
+            }
+        }
+        stage('Docker Build') {
+            steps {
+                dir("${PROJECT_DIR}") {
+                    echo '=== ETAPE 6 : Docker Build ==='
+                    sh 'docker compose build'
+                }
+            }
+        }
         stage('Deploiement') {
             steps {
                 dir("${PROJECT_DIR}") {
-                    echo '=== Arrêt des anciens conteneurs ==='
+                    echo '=== ETAPE 7 : Deploiement ==='
                     sh 'docker compose down || true'
-
-                    echo '=== Démarrage des nouveaux conteneurs ==='
                     sh 'docker compose up -d'
-
-                    echo '=== Attente démarrage MongoDB + Backend (25s) ==='
                     sh 'sleep 25'
                 }
             }
         }
-    }
-
-    post {
-        always {
-            // Affichage des conteneurs dans les logs Jenkins
-            sh 'docker ps --format "table {{.Names}}\\t{{.Status}}\\t{{.Ports}}" || true'
-            echo '=== Fin du pipeline ==='
-
-            // ENVOI DU MAIL (S'exécute à CHAQUE build)
-            script {
-                def statusIcon = currentBuild.currentResult == 'SUCCESS' ? '✅' : '❌'
-                mail(
-                    to:      'mn2243d@gmail.com',
-                    subject: "${statusIcon} [Jenkins] Build #${env.BUILD_NUMBER} — Statut: ${currentBuild.currentResult}",
-                    body:    """
-Bonjour,
-
-Le pipeline s'est terminé avec le statut : ${currentBuild.currentResult}
-
-Détails du Job :
-----------------------------------------------
-Projet : ${env.JOB_NAME}
-Build  : #${env.BUILD_NUMBER}
-Durée  : ${currentBuild.durationString}
-Logs   : ${env.BUILD_URL}
-----------------------------------------------
-
-=== Statut Docker final ===
-${statusIcon} Vérifiez les logs pour plus de détails.
-                    """
-                )
-            }
-        }
-        
-        success {
-            echo '''
-==============================================
-  PIPELINE REUSSI - Application deployee !
-  Frontend : http://localhost
-  API      : http://localhost:5000/api/health
-==============================================
-            '''
-        }
-        
-        failure {
-            echo '''
-==============================================
-  PIPELINE ECHOUE
-  Consultez les logs ci-dessus
-==============================================
-            '''
-        }
-    }
-}
-
-
-pipeline {
-    agent any
-
-    environment {
-        PROJECT_DIR    = 'Express_MongoDB_V6'
-        DOCKERHUB_USER = 'modoundiaye'
-        BACKEND_IMAGE  = 'modoundiaye/portfolio-backend'
-        FRONTEND_IMAGE = 'modoundiaye/portfolio-frontend'
-        SONAR_PROJECT  = 'portfolio-v6'
-    }
-
-    stages {
-
-        stage('Checkout') {
-            steps {
-                checkout scm
-                echo "=== Commit : ${env.GIT_COMMIT?.take(7)} ==="
-            }
-        }
-
-        // NOUVEAU : Tests avec couverture de code
-        // Jest genere le rapport coverage/lcov.info
-        // SonarQube utilisera ce rapport pour mesurer la couverture
-        stage('Tests') {
-            steps {
-                dir("${PROJECT_DIR}/backend-expressJS") {
-                    echo '=== Execution des tests Jest avec couverture ==='
-                    sh 'npm install'
-                    sh 'npm run test:coverage || true'
-                    // "|| true" : le pipeline continue meme si des tests echouent
-                    // SonarQube affichera les tests en echec dans son tableau de bord
-                }
-            }
-        }
-
-        // NOUVEAU : Analyse SonarQube
-        // SonarScanner analyse le code et envoie les resultats au serveur
-        stage('SonarQube Analysis') {
-            steps {
-                dir("${PROJECT_DIR}") {
-                    echo '=== Analyse SonarQube du code source ==='
-
-                    // withSonarQubeEnv : injecte les variables de connexion SonarQube
-                    // 'SonarQube-Local' = nom configure dans Jenkins -> System
-                    withSonarQubeEnv('SonarQube-Local') {
-                        // scannerHome : chemin vers SonarScanner installe dans Jenkins Tools
-                        def scannerHome = tool 'SonarScanner'
-
-                        // Lancement de l analyse
-                        sh """
-                            ${scannerHome}/bin/sonar-scanner \
-                              -Dsonar.projectKey=${SONAR_PROJECT} \
-                              -Dsonar.projectName='Portfolio Express MongoDB V6' \
-                              -Dsonar.sources=backend-expressJS,frontend-react/src \
-                              -Dsonar.exclusions=**/node_modules/**,**/dist/**,**/coverage/** \
-                              -Dsonar.javascript.lcov.reportPaths=backend-expressJS/coverage/lcov.info \
-                              -Dsonar.sourceEncoding=UTF-8
-                        """
-                    }
-                    echo '=== Analyse SonarQube terminee ==='
-                }
-            }
-        }
-
-        // NOUVEAU : Verification du Quality Gate
-        // Attend que SonarQube ait fini l analyse et verifie si le Quality Gate est passe
-        stage('Quality Gate') {
-            steps {
-                echo '=== Verification du Quality Gate SonarQube ==='
-
-                // timeout : attend max 5 minutes le resultat du Quality Gate
-                timeout(time: 5, unit: 'MINUTES') {
-
-                    // waitForQualityGate : attend le resultat de l analyse
-                    // abortPipeline: true -> arrete le pipeline si Quality Gate FAILED
-                    def qg = waitForQualityGate abortPipeline: true
-
-                    if (qg.status != 'OK') {
-                        error "Quality Gate echoue : ${qg.status}"
-                    }
-                    echo "=== Quality Gate : ${qg.status} ==="
-                }
-            }
-        }
-
-        stage('Docker Build') {
-            steps {
-                sh "docker compose -f ${WORKSPACE}/${PROJECT_DIR}/docker-compose.yml build"
-            }
-        }
-
-        stage('Deploiement') {
-            steps {
-                sh "docker compose -f ${WORKSPACE}/${PROJECT_DIR}/docker-compose.yml down || true"
-                sh "docker compose -f ${WORKSPACE}/${PROJECT_DIR}/docker-compose.yml up -d"
-                sh 'sleep 30'
-            }
-        }
-
         stage('Health Check') {
             steps {
+                echo '=== ETAPE 8 : Health Check ==='
                 sh 'docker exec portfolio_backend wget --spider -q http://127.0.0.1:5000/api/health'
             }
         }
     }
-
     post {
+        success { echo '=== PIPELINE REUSSI ===' }
+        failure { echo '=== PIPELINE ECHOUE ===' }
         always {
             sh 'docker ps --format "table {{.Names}}\\t{{.Status}}" || true'
             echo '=== Fin du pipeline ==='
