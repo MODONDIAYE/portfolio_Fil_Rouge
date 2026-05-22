@@ -107,9 +107,6 @@ pipeline {
         success { echo '=== PIPELINE REUSSI ===' }
         failure { echo '=== PIPELINE ECHOUE ===' }
         always {
-            node {
-                sh 'docker ps --format "table {{.Names}}\\t{{.Status}}" || true'
-            }
             echo '=== Fin du pipeline ==='
         }
     }
