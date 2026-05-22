@@ -40,9 +40,13 @@ pipeline {
             steps {
                 dir("${PROJECT_DIR}") {
                     echo '=== ETAPE 4 : Deploiement ==='
-                    sh 'docker compose down || true'
-                    sh 'docker rm -f portfolio_mongodb portfolio_backend portfolio_frontend 2>/dev/null || true'
-                    sh 'docker compose up -d --force-recreate'
+                    sh '''
+                        docker compose down || true
+                        for name in portfolio_mongodb portfolio_backend portfolio_frontend; do
+                            docker ps -aq --filter "name=$name" | xargs -r docker rm -f 2>/dev/null || true
+                        done
+                        docker compose up -d --force-recreate
+                    '''
                     sh 'sleep 25'
                 }
             }
