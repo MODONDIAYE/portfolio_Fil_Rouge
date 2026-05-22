@@ -90,9 +90,9 @@ pipeline {
                             --network "$SONAR_NETWORK" \
                             -v "$(pwd):/usr/src" \
                             -w /usr/src \
-                            sonarsource/sonar-scanner-cli \
+                            sonarsource/sonar-scanner-cli:5.0 \
                             -Dsonar.host.url=http://sonarqube_portfolio:9000 \
-                            -Dsonar.token=9db3525e595688722b7c3bb54906a032 \
+                            -Dsonar.login=9db3525e595688722b7c3bb54906a032 \
                             -Dsonar.projectKey=portfolio-v6 \
                             -Dsonar.projectName="Portfolio Express MongoDB V6" \
                             -Dsonar.sources=backend-expressJS,frontend-react/src \
