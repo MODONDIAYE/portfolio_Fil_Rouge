@@ -1,42 +1,7 @@
-// ================================================================
-// JENKINSFILE — Pipeline CI/CD Portfolio Modou NDIAYE V6
-// ================================================================
-// Ce fichier definit le pipeline d automatisation complet du projet.
-// Il est lu et execute par Jenkins a chaque git push sur GitHub.
-// Langage : Groovy (syntaxe Declarative Pipeline de Jenkins)
-// Depot   : https://github.com/MODONDIAYE/portfolio_Fil_Rouge
-// ================================================================
-
-// "pipeline { }" est le bloc racine obligatoire de tout Jenkinsfile.
-// Il encapsule toute la definition du pipeline.
-// Sans ce mot-cle, Jenkins ne peut pas interpreter le fichier.
 pipeline {
-
-    // ----------------------------------------------------------------
-    // agent any
-    // ----------------------------------------------------------------
-    // "agent" definit SUR QUELLE MACHINE le pipeline va s executer.
-    // "any" = n importe quel agent (executeur) Jenkins disponible.
-    // Dans notre cas : le serveur Jenkins lui-meme = conteneur jenkins_portfolio.
-    // Alternatives possibles :
-    //   agent none                          -> pas d agent global (defini par stage)
-    //   agent { docker { image 'node:20' }} -> dans un conteneur Docker temporaire
-    //   agent { label 'linux' }             -> sur un agent avec le label "linux"
     agent any
 
-    // ----------------------------------------------------------------
-    // environment { }
-    // ----------------------------------------------------------------
-    // Declare des variables d environnement globales disponibles
-    // dans TOUTES les etapes (stages) du pipeline.
-    // Equivalent des variables d environnement shell (export VAR=valeur).
-    // Accessibles avec la syntaxe ${NOM_VARIABLE} dans les steps.
     environment {
-
-        // Nom du sous-dossier contenant l application dans le depot Git.
-        // Le depot contient plusieurs projets, on cible Express_MongoDB_V6.
-        // Utilise pour construire les chemins absolus :
-        //   ${WORKSPACE}/${PROJECT_DIR}/docker-compose.yml
         PROJECT_DIR = 'Express_MongoDB_V6'
 
         // Nom d utilisateur du compte Docker Hub de Modou NDIAYE.
@@ -80,472 +45,107 @@ pipeline {
     // Configure le comportement global du pipeline.
     // Ces options s appliquent a l ensemble du pipeline.
     options {
-
-        // timeout : arrete automatiquement le pipeline apres 20 minutes.
-        // Protege contre les builds bloques indefiniment.
-        // Exemple de blocage : une commande docker qui attend une reponse reseau.
-        // Sans timeout, un build bloque occuperait un executeur Jenkins en permanence.
-        // time: 20    -> valeur numerique de la duree
-        // unit: 'MINUTES' -> unite de temps (autres : 'SECONDS', 'HOURS', 'DAYS')
         timeout(time: 20, unit: 'MINUTES')
-
-        // buildDiscarder : supprime automatiquement les anciens builds.
-        // logRotator : strategie de rotation basee sur le nombre de builds.
-        // numToKeepStr: '5' -> conserve uniquement les 5 DERNIERS builds.
-        // Les builds plus anciens (logs, artefacts, workspace) sont supprimes.
-        // Economise l espace disque sur le serveur Jenkins.
         buildDiscarder(logRotator(numToKeepStr: '5'))
     }
 
-    // ----------------------------------------------------------------
-    // stages { }
-    // ----------------------------------------------------------------
-    // Contient la liste ordonnee de toutes les etapes du pipeline.
-    // Chaque stage represente une phase du cycle de vie de l application.
-    // Execution : sequentielle, dans l ordre de declaration.
-    // Si un stage echoue -> les stages suivants sont ignores (skipped).
     stages {
-
-        // ============================================================
-        // STAGE 1 : Checkout
-        // But : recuperer le code source depuis GitHub dans le workspace Jenkins.
-        // C est toujours la premiere etape de tout pipeline CI/CD.
-        // ============================================================
+        // ── ÉTAPE 1 : Récupérer le code ──────────────────────────
         stage('Checkout') {
-
-            // "steps { }" contient les actions concretes a executer dans ce stage.
-            // Chaque instruction dans steps est une commande Jenkins ou shell.
             steps {
-
-                // echo : affiche un message texte dans les logs de la Console Output.
-                // Utile pour identifier les etapes dans les logs et faciliter le debogage.
-                echo '=== ETAPE 1 : Recuperation du code source depuis GitHub ==='
-
-                // checkout scm : clone ou met a jour le depot Git dans le workspace.
-                // "scm" = Source Code Management = configuration Git du job Jenkins.
-                // Jenkins utilise automatiquement :
-                //   - L URL du depot : https://github.com/MODONDIAYE/portfolio_Fil_Rouge.git
-                //   - La branche : main (configuree dans le job)
-                //   - Les credentials : token GitHub (stocke dans Jenkins Credentials)
-                // Resultat : le code est disponible dans :
-                //   /var/jenkins_home/workspace/<nom-du-job>/
+                echo '=== Récupération du code source ==='
                 checkout scm
-
-                // Affiche le hash court (7 caracteres) du commit qui vient d etre recupere.
-                // env.GIT_COMMIT : variable Jenkins remplie automatiquement par checkout scm.
-                //   Contient le hash SHA complet du commit (40 caracteres).
-                //   Exemple : b9442bcb5dd3bd4fb1e41d405165723a09d44a78
-                // ?.take(7) : prend les 7 premiers caracteres.
-                //   Le "?" est l operateur safe-navigation Groovy.
-                //   Evite une NullPointerException si GIT_COMMIT est null.
-                //   Resultat : b9442bc (format court utilise par GitHub)
                 echo "=== Commit : ${env.GIT_COMMIT?.take(7)} ==="
             }
         }
 
-        // ============================================================
-        // STAGE 2 : Verification
-        // But : verifier que l environnement est pret avant de builder.
-        // Affiche les versions des outils et l etat des conteneurs existants.
-        // ============================================================
+        // ── ÉTAPE 2 : Vérifier Docker ─────────────────────────────
         stage('Verification') {
             steps {
-
-                // Message de debut d etape dans les logs.
-                echo '=== ETAPE 2 : Verification de l environnement Docker ==='
-
-                // sh 'commande' : execute une commande dans le shell (bash/sh) de l agent.
-                // Guillemets simples '...' : la commande est passee telle quelle, sans
-                // interpolation des variables Jenkins (${VAR} n est pas remplace).
-                // Guillemets doubles "..." : les variables Jenkins ${VAR} sont remplacees.
-
-                // Verifie que Docker CLI est installe et accessible dans Jenkins.
-                // Sortie attendue : "Docker version 29.x.x, build xxxxxxx"
-                // Si Docker n est pas disponible -> le stage echoue immediatement.
+                echo '=== Vérification Docker ==='
                 sh 'docker --version'
-
-                // Verifie que Docker Compose est disponible.
-                // Sortie attendue : "Docker Compose version v5.x.x"
-                // Necessaire pour les stages Docker Build et Deploiement.
                 sh 'docker compose version'
-
-                // Liste le contenu du dossier Express_MongoDB_V6 dans le workspace.
-                // ${WORKSPACE} : variable Jenkins = chemin absolu du workspace.
-                //   Exemple : /var/jenkins_home/workspace/portfolio-v6-pipeline
-                // ${PROJECT_DIR} : variable definie dans environment = Express_MongoDB_V6
-                // ls -la : liste tous les fichiers avec permissions, taille et date.
-                // Permet de confirmer que docker-compose.yml et les dossiers sont presents.
-                sh "ls -la ${WORKSPACE}/${PROJECT_DIR}/"
-
-                // Liste tous les conteneurs Docker en cours d execution sur l hote.
-                // Permet de voir l etat de l environnement AVANT le deploiement.
-                // --format "table ..." : formate la sortie en tableau lisible.
-                // {{.Names}} : nom du conteneur (ex: portfolio_backend)
-                // \\t : caractere tabulation pour aligner les colonnes
-                // {{.Status}} : etat du conteneur (ex: Up 2 hours, Exited)
                 sh 'docker ps --format "table {{.Names}}\\t{{.Status}}"'
             }
         }
 
-        // ============================================================
-        // STAGE 3 : Docker Build
-        // But : construire les images Docker du backend et du frontend.
-        // Node.js n est PAS installe dans Jenkins.
-        // Le build React et Node.js se fait DANS les images Docker via les Dockerfiles.
-        // ============================================================
+        // ── ÉTAPE 3 : Build Docker ────────────────────────────────
         stage('Docker Build') {
             steps {
-
-                // Message de debut d etape.
-                echo '=== ETAPE 3 : Construction des images Docker ==='
-
-                // docker compose build : lit docker-compose.yml et construit les images.
-                //
-                // Ce que fait le Dockerfile du BACKEND (backend-expressJS/Dockerfile) :
-                //   FROM node:20-alpine    -> image de base Node.js legere (Alpine Linux ~5Mo)
-                //   WORKDIR /app           -> definit le repertoire de travail dans le conteneur
-                //   COPY package*.json ./  -> copie package.json pour installer les dependances
-                //   RUN npm install        -> installe les packages Node.js (express, mongoose...)
-                //   COPY . .               -> copie tout le code source dans le conteneur
-                //   EXPOSE 5000            -> documente que le conteneur ecoute sur le port 5000
-                //   CMD node server.js     -> commande executee au demarrage du conteneur
-                //
-                // Ce que fait le Dockerfile du FRONTEND (frontend-react/Dockerfile) :
-                //   Etape 1 - Builder (node:20-alpine) :
-                //     COPY package*.json ./ -> copie les dependances
-                //     RUN npm install       -> installe React, Vite, etc.
-                //     COPY . .              -> copie le code source React
-                //     RUN npm run build     -> compile React -> genere le dossier dist/
-                //   Etape 2 - Serveur (nginx:alpine) :
-                //     COPY --from=builder /app/dist /usr/share/nginx/html -> copie dist/
-                //     COPY nginx.conf ...   -> configure Nginx (proxy /api/ vers backend)
-                //     EXPOSE 80             -> port d ecoute Nginx
-                //
-                // -f ${WORKSPACE}/${PROJECT_DIR}/docker-compose.yml :
-                //   -f = --file : specifie le chemin ABSOLU vers docker-compose.yml.
-                //   OBLIGATOIRE car Docker cherche le fichier depuis son propre contexte,
-                //   pas depuis le repertoire courant du shell Jenkins.
-                //   Sans -f : erreur "no configuration file provided: not found"
-                //
-                // Le cache Docker est utilise : si le code n a pas change depuis le dernier
-                // build, les couches (layers) sont reutilisees -> build beaucoup plus rapide.
-                sh "docker compose -f ${WORKSPACE}/${PROJECT_DIR}/docker-compose.yml build"
-
-                // Confirmation que les images ont ete construites avec succes.
-                echo '=== Images construites avec succes ==='
-            }
-        }
-
-        // ============================================================
-        // STAGE 4 : Push Docker Hub
-        // But : tagger les images et les pousser vers Docker Hub.
-        // Docker Hub est un registre public d images (hub.docker.com).
-        // Permet de versionner les images et de les deployer sur n importe quel serveur.
-        // ============================================================
-        stage('Push Docker Hub') {
-            steps {
-
-                // Message de debut d etape.
-                echo '=== ETAPE 4 : Push des images vers Docker Hub ==='
-
-                // withCredentials : injecte des secrets de facon securisee dans le pipeline.
-                // Les valeurs sont masquees dans les logs Jenkins (affichees comme ***).
-                // Jamais de mot de passe en clair dans le Jenkinsfile !
-                //
-                // usernamePassword : type de credential = couple login + mot de passe.
-                //   credentialsId: 'dockerhub-credentials'
-                //     -> ID du credential cree dans Jenkins :
-                //        Manage Jenkins > Credentials > Global > Add Credentials
-                //        Kind: Username with password
-                //        Username: modoundiaye (login Docker Hub)
-                //        Password: <token Docker Hub>
-                //        ID: dockerhub-credentials
-                //   usernameVariable: 'DOCKER_USER'
-                //     -> Le login Docker Hub sera accessible via $DOCKER_USER dans le shell
-                //   passwordVariable: 'DOCKER_PASS'
-                //     -> Le mot de passe/token sera accessible via $DOCKER_PASS dans le shell
-                withCredentials([usernamePassword(credentialsId: 'dockerhub-credentials', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
-
-                    // sh ''' ... ''' : bloc shell multi-lignes.
-                    // Les triples guillemets simples permettent d ecrire plusieurs commandes
-                    // sur plusieurs lignes dans un seul bloc shell.
-                    sh '''
-                        # Connexion a Docker Hub avec les credentials injectes.
-                        # echo "$DOCKER_PASS" : envoie le mot de passe vers stdin.
-                        # | (pipe) : redirige la sortie de echo vers l entree de docker login.
-                        # docker login -u "$DOCKER_USER" : connexion avec le nom d utilisateur.
-                        # --password-stdin : lit le mot de passe depuis stdin.
-                        #   Plus securise que docker login -u user -p password
-                        #   car le mot de passe n apparait pas dans la liste des processus.
-                        echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
-
-                        # docker tag : cree un alias (tag) pour une image Docker existante.
-                        # Format : docker tag <image-source> <image-destination>
-                        # express_mongodb_v6-backend:latest : nom local de l image construite
-                        #   a l etape 3 (nom genere par docker compose build).
-                        # ${BACKEND_IMAGE}:latest : nom sur Docker Hub avec le tag "latest".
-                        #   "latest" = derniere version, ecrase le tag precedent sur Docker Hub.
-                        docker tag express_mongodb_v6-backend:latest ${BACKEND_IMAGE}:latest
-
-                        # Tag de l image backend avec le numero de build Jenkins.
-                        # ${BUILD_NUMBER} : variable Jenkins auto-incrementee a chaque build.
-                        #   Exemple : si c est le 15eme build, BUILD_NUMBER = 15.
-                        # Resultat : modoundiaye/portfolio-backend:15
-                        # Avantage : permet de revenir a une version precise (ROLLBACK).
-                        #   docker pull modoundiaye/portfolio-backend:14  -> version precedente
-                        docker tag express_mongodb_v6-backend:latest ${BACKEND_IMAGE}:${BUILD_NUMBER}
-
-                        # Tag de l image frontend avec "latest".
-                        # Meme logique que pour le backend.
-                        docker tag express_mongodb_v6-frontend:latest ${FRONTEND_IMAGE}:latest
-
-                        # Tag de l image frontend avec le numero de build.
-                        docker tag express_mongodb_v6-frontend:latest ${FRONTEND_IMAGE}:${BUILD_NUMBER}
-
-                        # docker push : envoie l image vers Docker Hub.
-                        # Rend l image accessible publiquement sur hub.docker.com.
-                        # Necessite d etre connecte (docker login fait juste avant).
-                        docker push ${BACKEND_IMAGE}:latest
-
-                        # Pousse aussi la version numerotee pour garder l historique.
-                        docker push ${BACKEND_IMAGE}:${BUILD_NUMBER}
-
-                        # Pousse le frontend:latest vers Docker Hub.
-                        docker push ${FRONTEND_IMAGE}:latest
-
-                        # Pousse le frontend avec le tag de version numerotee.
-                        docker push ${FRONTEND_IMAGE}:${BUILD_NUMBER}
-
-                        # docker logout : deconnecte Docker de Docker Hub.
-                        # Supprime le token d authentification du systeme.
-                        # Bonne pratique de securite : ne pas rester connecte inutilement.
-                        docker logout
-                    '''
+                dir("${PROJECT_DIR}") {
+                    echo '=== Construction des images Docker ==='
+                    sh 'docker compose build'
+                    echo '=== Images construites avec succès ==='
                 }
-
-                // Confirmation que les images ont ete poussees avec succes.
-                echo '=== Images poussees vers Docker Hub ==='
             }
         }
 
-        // ============================================================
-        // STAGE 5 : Deploiement
-        // But : arreter les anciens conteneurs et demarrer les nouveaux.
-        // Strategie : Rolling Update (les donnees MongoDB sont preservees).
-        // ============================================================
+        // ── ÉTAPE 4 : Déploiement ─────────────────────────────────
         stage('Deploiement') {
             steps {
+                dir("${PROJECT_DIR}") {
+                    echo '=== Arrêt des anciens conteneurs ==='
+                    sh 'docker compose down || true'
 
-                // Message de debut d etape.
-                echo '=== ETAPE 5 : Deploiement des conteneurs ==='
+                    echo '=== Démarrage des nouveaux conteneurs ==='
+                    sh 'docker compose up -d'
 
-                // Message informatif avant l arret.
-                echo '    Arret des anciens conteneurs...'
-
-                // docker compose down : arrete ET supprime les conteneurs en cours.
-                // Ce qui est SUPPRIME : les conteneurs, le reseau Docker.
-                // Ce qui est CONSERVE : le volume mongodb_data (donnees MongoDB).
-                //   -> Les projets, membres et contacts en base ne sont pas perdus.
-                //
-                // -f ${WORKSPACE}/${PROJECT_DIR}/docker-compose.yml :
-                //   Chemin absolu vers docker-compose.yml (meme raison que pour build).
-                //
-                // || true :
-                //   || = operateur logique "OU" en shell.
-                //   Si docker compose down echoue (ex: aucun conteneur ne tourne),
-                //   la commande retourne un code d erreur non nul.
-                //   "|| true" force le code de retour a 0 (succes) dans ce cas.
-                //   Evite que le pipeline echoue lors du PREMIER deploiement
-                //   ou lors d un deploiement apres un arret manuel des conteneurs.
-                sh "docker compose -f ${WORKSPACE}/${PROJECT_DIR}/docker-compose.yml down || true"
-
-                // Message informatif avant le demarrage.
-                echo '    Demarrage des nouveaux conteneurs (-d = arriere-plan)...'
-
-                // docker compose up : cree et demarre tous les services du docker-compose.yml.
-                // -d (--detach) : mode arriere-plan.
-                //   Sans -d, la commande bloquerait le pipeline en attendant l arret des conteneurs.
-                //   Avec -d, Jenkins continue l execution du pipeline pendant que les conteneurs demarrent.
-                //
-                // Ordre de demarrage (defini par depends_on dans docker-compose.yml) :
-                //   1. portfolio_mongodb  (port 27017) : MongoDB demarre en premier.
-                //      Healthcheck : mongosh --eval "db.adminCommand('ping')" toutes les 10s.
-                //      Le backend attend que MongoDB soit "healthy" avant de demarrer.
-                //   2. portfolio_backend  (port 5000)  : API Express.js.
-                //      Se connecte a MongoDB via MONGODB_URI dans les variables d environnement.
-                //   3. portfolio_frontend (port 80)    : React servi par Nginx.
-                //      Nginx proxifie /api/* vers le backend (port 5000).
-                sh "docker compose -f ${WORKSPACE}/${PROJECT_DIR}/docker-compose.yml up -d"
-
-                // Message informatif pendant l attente.
-                echo '    Attente demarrage MongoDB + Backend (30s)...'
-
-                // sleep 30 : pause de 30 secondes.
-                // POURQUOI ATTENDRE ?
-                //   - MongoDB met ~10-15s a initialiser ses fichiers de donnees.
-                //   - Le healthcheck de MongoDB s execute toutes les 10s.
-                //   - Le backend attend que MongoDB soit "healthy" avant de se connecter.
-                //   - Sans cette attente, le health check du stage suivant echouerait
-                //     car l API ne serait pas encore prete a repondre aux requetes.
-                sh 'sleep 30'
+                    echo '=== Attente démarrage MongoDB + Backend (25s) ==='
+                    sh 'sleep 25'
+                }
             }
         }
-
-        // ============================================================
-        // STAGE 6 : Health Check
-        // But : verifier que l application est bien operationnelle.
-        // Teste l API backend ET le frontend React apres le deploiement.
-        // ============================================================
-        stage('Health Check') {
-            steps {
-
-                // Message de debut d etape.
-                echo '=== ETAPE 6 : Verification de l application ==='
-
-                // Message informatif pour le test de l API.
-                echo '    Test API Backend (depuis le conteneur portfolio_backend)...'
-
-                // PROBLEME : Jenkins tourne dans le conteneur "jenkins_portfolio".
-                // "localhost" dans ce conteneur = le conteneur Jenkins lui-meme.
-                // Il ne pointe PAS vers portfolio_backend.
-                // Chaque conteneur Docker a son propre reseau isole.
-                //
-                // SOLUTION : docker exec portfolio_backend <commande>
-                //   Execute la commande A L INTERIEUR du conteneur portfolio_backend.
-                //   Dans ce conteneur, localhost:5000 = l API Express.js.
-                //
-                // wget --spider : fait une requete HTTP HEAD sans telecharger le contenu.
-                //   Verifie uniquement que le serveur repond (code HTTP 2xx).
-                //   Plus leger que curl pour un simple health check.
-                // -q (--quiet) : mode silencieux, n affiche pas les details de la requete.
-                // http://127.0.0.1:5000/api/health : route de sante de l API Express.js.
-                //   Repond : { "status": "OK", "message": "API operationnelle", "version": "1.0.0" }
-                // Code de retour : 0 = succes, 1 = echec -> stage FAILURE si echec.
-                sh 'docker exec portfolio_backend wget --spider -q http://127.0.0.1:5000/api/health'
-
-                // Message informatif pour le test du frontend.
-                echo '    Test Frontend React (depuis le conteneur portfolio_frontend)...'
-
-                // Boucle de retry pour le frontend.
-                // Nginx peut mettre quelques secondes supplementaires a etre pret.
-                // La boucle essaie jusqu a 5 fois avec 5 secondes d attente entre chaque.
-                //
-                // for i in 1 2 3 4 5 : boucle shell sur les valeurs 1, 2, 3, 4, 5.
-                //   i = variable de boucle contenant la valeur courante (1, puis 2, etc.)
-                //
-                // docker exec portfolio_frontend wget --spider -q http://127.0.0.1:80 :
-                //   Execute wget DANS le conteneur Nginx (portfolio_frontend).
-                //   Teste que Nginx sert bien les fichiers React sur le port 80.
-                //
-                // && exit 0 :
-                //   && = operateur "ET" en shell : execute la commande suivante si la precedente reussit.
-                //   Si wget reussit (code 0) -> exit 0 -> quitte la boucle avec SUCCES.
-                //
-                // echo "Tentative $i echouee..." :
-                //   Affiche le numero de la tentative echouee dans les logs.
-                //   $i = valeur courante de la variable de boucle.
-                //
-                // sleep 5 : attend 5 secondes avant la prochaine tentative.
-                //
-                // exit 1 (apres la boucle) :
-                //   Si toutes les 5 tentatives echouent -> retourne code 1 -> stage FAILURE.
-                //   Jenkins marque le pipeline comme ECHEC et envoie une notification.
-                sh '''
-                    for i in 1 2 3 4 5; do
-                        docker exec portfolio_frontend wget --spider -q http://127.0.0.1:80 && exit 0
-                        echo "    Tentative $i echouee, retry dans 5s..."
-                        sleep 5
-                    done
-                    exit 1
-                '''
-
-                // Confirmation que l application repond correctement sur les deux ports.
-                echo '=== Application operationnelle ==='
-            }
-        }
-
     }
 
-    // ----------------------------------------------------------------
-    // post { }
-    // ----------------------------------------------------------------
-    // Definit les actions executees APRES la fin de tous les stages.
-    // Ces blocs s executent quel que soit le resultat du pipeline.
-    // Utile pour les notifications, le nettoyage et le diagnostic.
     post {
-
-        // success : execute UNIQUEMENT si tous les stages ont reussi.
-        // Statut du pipeline : SUCCESS (icone verte dans Jenkins).
-        // Envoie un email de notification de succes au developpeur.
-        success {
-
-            // Message de succes dans les logs Jenkins.
-            echo '=== PIPELINE REUSSI - Application deployee ! Frontend: http://localhost | API: http://localhost:5000/api/health ==='
-
-            // mail : envoie un email via le serveur SMTP configure dans Jenkins.
-            // Configuration SMTP : Manage Jenkins > System > E-mail Notification.
-            //
-            // to : adresse email du destinataire (le developpeur).
-            //
-            // subject : objet de l email.
-            //   env.JOB_NAME    = nom du job Jenkins (ex: portfolio-v6-pipeline)
-            //   env.BUILD_NUMBER = numero auto-incremente du build (ex: 42)
-            //
-            // body : corps de l email (texte multi-lignes avec triple guillemets).
-            //   env.GIT_COMMIT?.take(7) = hash court du commit deploye (ex: b9442bc)
-            //   env.BUILD_URL = URL directe vers ce build dans Jenkins
-            //     Exemple : http://localhost:8080/job/portfolio-v6-pipeline/42/
-            mail to: 'mn2243d@gmail.com',
-                 subject: "Jenkins - Build SUCCESS : ${env.JOB_NAME} #${env.BUILD_NUMBER}",
-                 body: """Le pipeline ${env.JOB_NAME} a reussi.
-
-Commit : ${env.GIT_COMMIT?.take(7)}
-Build  : ${env.BUILD_URL}
-
-Application deployee :
-- Frontend : http://localhost
-- API      : http://localhost:5000/api/health
-"""
-        }
-
-        // failure : execute UNIQUEMENT si au moins un stage a echoue.
-        // Statut du pipeline : FAILURE (icone rouge dans Jenkins).
-        // Envoie un email d alerte pour informer le developpeur de l echec.
-        failure {
-
-            // Message d echec dans les logs Jenkins.
-            echo '=== PIPELINE ECHOUE - Consultez les logs ci-dessus pour identifier le stage en erreur ==='
-
-            // Email d alerte en cas d echec.
-            // Permet au developpeur d etre notifie immediatement.
-            // Le lien BUILD_URL permet d acceder directement aux logs d erreur.
-            mail to: 'mn2243d@gmail.com',
-                 subject: "Jenkins - Build FAILED : ${env.JOB_NAME} #${env.BUILD_NUMBER}",
-                 body: """Le pipeline ${env.JOB_NAME} a echoue.
-
-Commit : ${env.GIT_COMMIT?.take(7)}
-Build  : ${env.BUILD_URL}
-
-Consultez les logs pour identifier l erreur.
-"""
-        }
-
-        // always : execute dans TOUS les cas (succes, echec ou annulation).
-        // Utile pour les actions de diagnostic systematique.
         always {
-
-            // Affiche l etat final de TOUS les conteneurs Docker apres le pipeline.
-            // Permet de diagnostiquer rapidement si un conteneur n a pas demarre.
-            // --format "table ..." : formate la sortie en tableau lisible.
-            //   {{.Names}}  : nom du conteneur (ex: portfolio_backend)
-            //   \\t         : tabulation pour aligner les colonnes
-            //   {{.Status}} : etat (ex: Up 2 minutes, Exited (1) 30 seconds ago)
-            //   {{.Ports}}  : ports exposes (ex: 0.0.0.0:5000->5000/tcp)
-            // || true : si docker ps echoue (Docker indisponible), ne pas faire echouer ce bloc.
+            // Affichage des conteneurs dans les logs Jenkins
             sh 'docker ps --format "table {{.Names}}\\t{{.Status}}\\t{{.Ports}}" || true'
-
-            // Message de fin de pipeline dans les logs.
             echo '=== Fin du pipeline ==='
+
+            // ENVOI DU MAIL (S'exécute à CHAQUE build)
+            script {
+                def statusIcon = currentBuild.currentResult == 'SUCCESS' ? '✅' : '❌'
+                mail(
+                    to:      'mn2243d@gmail.com',
+                    subject: "${statusIcon} [Jenkins] Build #${env.BUILD_NUMBER} — Statut: ${currentBuild.currentResult}",
+                    body:    """
+Bonjour,
+
+Le pipeline s'est terminé avec le statut : ${currentBuild.currentResult}
+
+Détails du Job :
+----------------------------------------------
+Projet : ${env.JOB_NAME}
+Build  : #${env.BUILD_NUMBER}
+Durée  : ${currentBuild.durationString}
+Logs   : ${env.BUILD_URL}
+----------------------------------------------
+
+=== Statut Docker final ===
+${statusIcon} Vérifiez les logs pour plus de détails.
+                    """
+                )
+            }
+        }
+        
+        success {
+            echo '''
+==============================================
+  PIPELINE REUSSI - Application deployee !
+  Frontend : http://localhost
+  API      : http://localhost:5000/api/health
+==============================================
+            '''
+        }
+        
+        failure {
+            echo '''
+==============================================
+  PIPELINE ECHOUE
+  Consultez les logs ci-dessus
+==============================================
+            '''
         }
     }
 }
