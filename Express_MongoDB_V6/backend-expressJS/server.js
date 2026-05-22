@@ -43,31 +43,34 @@ app.use((err, req, res, next) => {
   res.status(500).json({ message: 'Erreur serveur interne', error: process.env.NODE_ENV === 'development' ? err.message : undefined });
 });
 
-// ── Démarrage : connexion MongoDB PUIS écoute ──────────
+// ── Démarrage : uniquement si le fichier est exécuté directement ──
+// require.main === module est FAUX quand Jest importe server.js pour les tests.
+// Cela empêche app.listen() de s'exécuter pendant les tests.
 const PORT = process.env.PORT || 5000;
 
-mongoose
-  .connect(process.env.MONGODB_URI)
-  .then(() => {
-    console.log('✅ MongoDB Atlas connecté');
-    const server = app.listen(PORT, () =>
-      console.log(`🚀 Serveur démarré sur http://localhost:${PORT}`)
-    );
+if (require.main === module) {
+  mongoose
+    .connect(process.env.MONGODB_URI)
+    .then(() => {
+      console.log('✅ MongoDB Atlas connecté');
+      const server = app.listen(PORT, () =>
+        console.log(`🚀 Serveur démarré sur http://localhost:${PORT}`)
+      );
 
-    // Gestion propre si le port est déjà utilisé
-    server.on('error', (err) => {
-      if (err.code === 'EADDRINUSE') {
-        console.error(`❌ Port ${PORT} déjà utilisé. Arrêtez l'autre processus et relancez.`);
-        console.error(`   → Commande : taskkill /F /IM node.exe  (Windows)`);
-      } else {
-        console.error('❌ Erreur serveur :', err.message);
-      }
+      server.on('error', (err) => {
+        if (err.code === 'EADDRINUSE') {
+          console.error(`❌ Port ${PORT} déjà utilisé. Arrêtez l'autre processus et relancez.`);
+          console.error(`   → Commande : taskkill /F /IM node.exe  (Windows)`);
+        } else {
+          console.error('❌ Erreur serveur :', err.message);
+        }
+        process.exit(1);
+      });
+    })
+    .catch(err => {
+      console.error('❌ Connexion MongoDB échouée :', err.message);
       process.exit(1);
     });
-  })
-  .catch(err => {
-    console.error('❌ Connexion MongoDB échouée :', err.message);
-    process.exit(1);
-  });
+}
 
 module.exports = app;
