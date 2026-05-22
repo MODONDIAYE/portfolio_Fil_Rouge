@@ -28,19 +28,18 @@ pipeline {
         }
         stage('Tests') {
             steps {
-                dir("${PROJECT_DIR}/backend-expressJS") {
-                    echo '=== ETAPE 3 : Tests Jest ==='
-                    sh 'npm install'
-                    sh 'npm run test:coverage || true'
-                    echo '=== Tests termines ==='
-                }
+                echo '=== ETAPE 3 : Tests Jest (via docker exec) ==='
+                // npm n est pas installe dans Jenkins.
+                // On execute les tests DANS le conteneur portfolio_backend
+                // qui a Node.js et npm disponibles.
+                sh 'docker exec portfolio_backend sh -c "cd /app && npm run test:coverage || true"'
+                echo '=== Tests termines ==='
             }
         }
         stage('SonarQube Analysis') {
             steps {
                 dir("${PROJECT_DIR}") {
                     echo '=== ETAPE 4 : Analyse SonarQube ==='
-                    // script{} est obligatoire pour utiliser def en Declarative Pipeline
                     script {
                         withSonarQubeEnv('SonarQube-Local') {
                             def scannerHome = tool 'SonarScanner'
