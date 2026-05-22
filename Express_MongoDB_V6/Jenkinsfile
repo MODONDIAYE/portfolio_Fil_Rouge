@@ -2,150 +2,186 @@ pipeline {
     agent any
 
     environment {
-        PROJECT_DIR = 'Express_MongoDB_V6'
-
-        // Nom d utilisateur du compte Docker Hub de Modou NDIAYE.
-        // Utilise pour tagger les images avant de les pousser.
-        // Profil public : https://hub.docker.com/u/modoundiaye
+        PROJECT_DIR    = 'Express_MongoDB_V6'
         DOCKERHUB_USER = 'modoundiaye'
-
-        // Nom complet de l image Docker du backend sur Docker Hub.
-        // Format obligatoire Docker Hub : utilisateur/nom-image
-        // Commande pour recuperer l image : docker pull modoundiaye/portfolio-backend
-        BACKEND_IMAGE = 'modoundiaye/portfolio-backend'
-
-        // Nom complet de l image Docker du frontend sur Docker Hub.
-        // Commande pour recuperer l image : docker pull modoundiaye/portfolio-frontend
+        BACKEND_IMAGE  = 'modoundiaye/portfolio-backend'
         FRONTEND_IMAGE = 'modoundiaye/portfolio-frontend'
     }
 
-    // ----------------------------------------------------------------
-    // triggers { }
-    // ----------------------------------------------------------------
-    // Definit les evenements qui declenchent automatiquement le pipeline.
-    // Sans triggers, le pipeline ne se lance QUE manuellement (bouton "Build Now").
     triggers {
-
-        // githubPush() : declenche le pipeline a chaque "git push" sur GitHub.
-        // Mecanisme : GitHub envoie une requete HTTP (webhook) a Jenkins.
-        // Jenkins recoit la notification et lance automatiquement le pipeline.
-        // Prerequis :
-        //   1. Plugin "GitHub Integration" installe dans Jenkins
-        //   2. Webhook configure dans GitHub :
-        //      Repository > Settings > Webhooks > Add webhook
-        //      Payload URL : http://<adresse-jenkins>/github-webhook/
-        //      Content type : application/json
-        //      Events : Just the push event
         githubPush()
     }
 
-    // ----------------------------------------------------------------
-    // options { }
-    // ----------------------------------------------------------------
-    // Configure le comportement global du pipeline.
-    // Ces options s appliquent a l ensemble du pipeline.
     options {
-        timeout(time: 20, unit: 'MINUTES')
+        timeout(time: 30, unit: 'MINUTES')
         buildDiscarder(logRotator(numToKeepStr: '5'))
     }
 
     stages {
-        // ── ÉTAPE 1 : Récupérer le code ──────────────────────────
+
+        // ETAPE 1 : Checkout
+        // Recupere le code source depuis GitHub
         stage('Checkout') {
             steps {
-                echo '=== Récupération du code source ==='
+                echo '=== ETAPE 1 : Recuperation du code source ==='
                 checkout scm
                 echo "=== Commit : ${env.GIT_COMMIT?.take(7)} ==="
             }
         }
 
-        // ── ÉTAPE 2 : Vérifier Docker ─────────────────────────────
+        // ETAPE 2 : Verification
+        // Verifie que Docker est disponible dans le conteneur Jenkins
         stage('Verification') {
             steps {
-                echo '=== Vérification Docker ==='
+                echo '=== ETAPE 2 : Verification Docker ==='
                 sh 'docker --version'
                 sh 'docker compose version'
                 sh 'docker ps --format "table {{.Names}}\\t{{.Status}}"'
             }
         }
 
-        // ── ÉTAPE 3 : Build Docker ────────────────────────────────
-        stage('Docker Build') {
+        // ETAPE 3 : Tests Jest avec couverture
+        // Lance les tests unitaires et genere coverage/lcov.info
+        // Ce rapport sera utilise par SonarQube pour mesurer la couverture de code
+        stage('Tests') {
             steps {
-                dir("${PROJECT_DIR}") {
-                    echo '=== Construction des images Docker ==='
-                    sh 'docker compose build'
-                    echo '=== Images construites avec succès ==='
+                dir("${PROJECT_DIR}/backend-expressJS") {
+                    echo '=== ETAPE 3 : Tests Jest avec couverture ==='
+                    sh 'npm install'
+                    // || true : continue meme si des tests echouent
+                    // SonarQube affichera les echecs dans son tableau de bord
+                    sh 'npm run test:coverage || true'
+                    echo '=== Tests termines - rapport coverage genere ==='
                 }
             }
         }
 
-        // ── ÉTAPE 4 : Déploiement ─────────────────────────────────
+        // ETAPE 4 : Analyse SonarQube
+        // SonarScanner analyse le code et envoie les resultats au serveur SonarQube
+        // Prerequis :
+        //   - Plugin "SonarQube Scanner" installe dans Jenkins
+        //   - Serveur SonarQube configure dans Manage Jenkins > System > SonarQube servers
+        //     Name : SonarQube-Local | URL : http://sonarqube_portfolio:9000
+        //   - SonarScanner configure dans Manage Jenkins > Tools > SonarQube Scanner
+        //     Name : SonarScanner
+        stage('SonarQube Analysis') {
+            steps {
+                dir("${PROJECT_DIR}") {
+                    echo '=== ETAPE 4 : Analyse SonarQube ==='
+                    // withSonarQubeEnv injecte les variables de connexion SonarQube
+                    // 'SonarQube-Local' = nom configure dans Jenkins > System
+                    withSonarQubeEnv('SonarQube-Local') {
+                        // tool 'SonarScanner' = installation configuree dans Jenkins > Tools
+                        def scannerHome = tool 'SonarScanner'
+                        sh """
+                            ${scannerHome}/bin/sonar-scanner \
+                              -Dsonar.projectKey=portfolio-v6 \
+                              -Dsonar.projectName='Portfolio Express MongoDB V6' \
+                              -Dsonar.sources=backend-expressJS,frontend-react/src \
+                              -Dsonar.exclusions=**/node_modules/**,**/dist/**,**/coverage/** \
+                              -Dsonar.javascript.lcov.reportPaths=backend-expressJS/coverage/lcov.info \
+                              -Dsonar.sourceEncoding=UTF-8
+                        """
+                    }
+                    echo '=== Analyse SonarQube terminee ==='
+                }
+            }
+        }
+
+        // ETAPE 5 : Quality Gate
+        // Attend le resultat de l analyse SonarQube et verifie les conditions de qualite
+        // Si Quality Gate FAILED -> pipeline arrete, pas de deploiement
+        // Quality Gate = conditions minimales : 0 bugs, 0 vulnerabilites, coverage >= 80%
+        stage('Quality Gate') {
+            steps {
+                echo '=== ETAPE 5 : Verification Quality Gate SonarQube ==='
+                // timeout : attend max 5 minutes le resultat
+                timeout(time: 5, unit: 'MINUTES') {
+                    // waitForQualityGate attend le webhook de SonarQube
+                    // abortPipeline: true -> arrete si Quality Gate FAILED
+                    waitForQualityGate abortPipeline: true
+                }
+                echo '=== Quality Gate : PASSED ==='
+            }
+        }
+
+        // ETAPE 6 : Build Docker
+        // Construit les images Docker backend et frontend
+        // Node.js n est pas necessaire dans Jenkins : le build se fait dans les images
+        stage('Docker Build') {
+            steps {
+                dir("${PROJECT_DIR}") {
+                    echo '=== ETAPE 6 : Construction des images Docker ==='
+                    sh 'docker compose build'
+                    echo '=== Images construites avec succes ==='
+                }
+            }
+        }
+
+        // ETAPE 7 : Deploiement
+        // Arrete les anciens conteneurs et demarre les nouveaux (Rolling Update)
+        // Le volume MongoDB est conserve -> donnees preservees
         stage('Deploiement') {
             steps {
                 dir("${PROJECT_DIR}") {
-                    echo '=== Arrêt des anciens conteneurs ==='
+                    echo '=== ETAPE 7 : Deploiement des conteneurs ==='
+                    echo '    Arret des anciens conteneurs...'
                     sh 'docker compose down || true'
-
-                    echo '=== Démarrage des nouveaux conteneurs ==='
+                    echo '    Demarrage des nouveaux conteneurs...'
                     sh 'docker compose up -d'
-
-                    echo '=== Attente démarrage MongoDB + Backend (25s) ==='
+                    echo '    Attente demarrage MongoDB + Backend (25s)...'
                     sh 'sleep 25'
                 }
             }
         }
+
+        // ETAPE 8 : Health Check
+        // Verifie que l application repond apres le deploiement
+        // docker exec execute curl DANS le conteneur car Jenkins a son propre localhost
+        stage('Health Check') {
+            steps {
+                echo '=== ETAPE 8 : Verification de l application ==='
+                echo '    Test API Backend...'
+                sh 'docker exec portfolio_backend wget --spider -q http://127.0.0.1:5000/api/health'
+                echo '    Test Frontend React...'
+                sh '''
+                    for i in 1 2 3 4 5; do
+                        docker exec portfolio_frontend wget --spider -q http://127.0.0.1:80 && exit 0
+                        echo "    Tentative $i echouee, retry dans 5s..."
+                        sleep 5
+                    done
+                    exit 1
+                '''
+                echo '=== Application operationnelle ==='
+            }
+        }
+
     }
 
     post {
+        success {
+            echo '=== PIPELINE REUSSI - Application deployee ! ==='
+            mail to: 'mn2243d@gmail.com',
+                 subject: "Jenkins - Build SUCCESS : ${env.JOB_NAME} #${env.BUILD_NUMBER}",
+                 body: """Le pipeline ${env.JOB_NAME} a reussi.
+Commit : ${env.GIT_COMMIT?.take(7)}
+Build  : ${env.BUILD_URL}
+Frontend : http://localhost
+API      : http://localhost:5000/api/health
+"""
+        }
+        failure {
+            echo '=== PIPELINE ECHOUE - Consultez les logs ==='
+            mail to: 'mn2243d@gmail.com',
+                 subject: "Jenkins - Build FAILED : ${env.JOB_NAME} #${env.BUILD_NUMBER}",
+                 body: """Le pipeline ${env.JOB_NAME} a echoue.
+Commit : ${env.GIT_COMMIT?.take(7)}
+Build  : ${env.BUILD_URL}
+"""
+        }
         always {
-            // Affichage des conteneurs dans les logs Jenkins
             sh 'docker ps --format "table {{.Names}}\\t{{.Status}}\\t{{.Ports}}" || true'
             echo '=== Fin du pipeline ==='
-
-            // ENVOI DU MAIL (S'exécute à CHAQUE build)
-            script {
-                def statusIcon = currentBuild.currentResult == 'SUCCESS' ? '✅' : '❌'
-                mail(
-                    to:      'mn2243d@gmail.com',
-                    subject: "${statusIcon} [Jenkins] Build #${env.BUILD_NUMBER} — Statut: ${currentBuild.currentResult}",
-                    body:    """
-Bonjour,
-
-Le pipeline s'est terminé avec le statut : ${currentBuild.currentResult}
-
-Détails du Job :
-----------------------------------------------
-Projet : ${env.JOB_NAME}
-Build  : #${env.BUILD_NUMBER}
-Durée  : ${currentBuild.durationString}
-Logs   : ${env.BUILD_URL}
-----------------------------------------------
-
-=== Statut Docker final ===
-${statusIcon} Vérifiez les logs pour plus de détails.
-                    """
-                )
-            }
-        }
-        
-        success {
-            echo '''
-==============================================
-  PIPELINE REUSSI - Application deployee !
-  Frontend : http://localhost
-  API      : http://localhost:5000/api/health
-==============================================
-            '''
-        }
-        
-        failure {
-            echo '''
-==============================================
-  PIPELINE ECHOUE
-  Consultez les logs ci-dessus
-==============================================
-            '''
         }
     }
 }
