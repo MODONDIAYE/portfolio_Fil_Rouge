@@ -1,21 +1,21 @@
-# ── Image de base Node.js LTS (Alpine = légère ~5Mo)
+# Image de base Node.js LTS (Alpine = legere ~5Mo)
 FROM node:20-alpine
 
-# ── Répertoire de travail dans le conteneur
+# Repertoire de travail dans le conteneur
 WORKDIR /app
 
-# ── Copier package.json en premier (optimise le cache Docker)
-# Si package.json n'a pas changé → npm install est mis en cache
+# Copier package.json en premier (optimise le cache Docker)
 COPY package*.json ./
 
-# ── Installer uniquement les dépendances de production
-RUN npm install --omit=dev
+# Installer TOUTES les dependances (y compris devDependencies pour Jest)
+# On garde les devDeps pour pouvoir lancer les tests dans le conteneur
+RUN npm install
 
-# ── Copier tout le code source
+# Copier tout le code source
 COPY . .
 
-# ── Port exposé par Express
+# Port expose par Express
 EXPOSE 5000
 
-# ── Démarrage du serveur
+# Demarrage du serveur
 CMD ["node", "server.js"]
