@@ -94,9 +94,12 @@ pipeline {
                     sh '''
                         SONAR_NETWORK=$(docker inspect sonarqube_portfolio --format '{{range $k,$v := .NetworkSettings.Networks}}{{$k}}{{end}}')
                         echo "SonarQube network: $SONAR_NETWORK"
+                        JENKINS_VOLUME=$(docker inspect jenkins_portfolio --format '{{range .Mounts}}{{if eq .Destination "/var/jenkins_home"}}{{.Source}}{{end}}{{end}}')
+                        HOST_PATH="${JENKINS_VOLUME}/workspace/portfolio-v6-pipelin/Express_MongoDB_V6"
+                        echo "Host path: $HOST_PATH"
                         docker run --rm \
                             --network "$SONAR_NETWORK" \
-                            -v "$(pwd):/usr/src" \
+                            -v "${HOST_PATH}:/usr/src" \
                             -w /usr/src \
                             sonarsource/sonar-scanner-cli \
                             -Dsonar.host.url=http://sonarqube:9000 \
