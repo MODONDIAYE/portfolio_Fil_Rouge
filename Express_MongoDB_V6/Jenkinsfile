@@ -4,7 +4,7 @@ pipeline {
         PROJECT_DIR    = 'Express_MongoDB_V6'
         BACKEND_IMAGE  = 'modoundiaye/portfolio-backend'
         FRONTEND_IMAGE = 'modoundiaye/portfolio-frontend'
-        SONAR_HOST_URL = 'http://sonarqube_portfolio:9000'
+        SONAR_HOST_URL = 'http://sonarqube:9000'
     }
     triggers { githubPush() }
     options {
@@ -98,9 +98,9 @@ pipeline {
                             --network "$SONAR_NETWORK" \
                             -v "$(pwd):/usr/src" \
                             -w /usr/src \
-                            sonarsource/sonar-scanner-cli:5.0 \
-                            -Dsonar.host.url=http://sonarqube_portfolio:9000 \
-                            -Dsonar.login=9db3525e595688722b7c3bb54906a032 \
+                            sonarsource/sonar-scanner-cli \
+                            -Dsonar.host.url=http://sonarqube:9000 \
+                            -Dsonar.token=squ_eb2e95d52ee8b14ce391764f027dde95147d3137 \
                             -Dsonar.projectKey=portfolio-v6 \
                             -Dsonar.projectName="Portfolio Express MongoDB V6" \
                             -Dsonar.sources=backend-expressJS,frontend-react/src \
@@ -118,7 +118,7 @@ pipeline {
                 timeout(time: 2, unit: 'MINUTES') {
                     sh '''
                         sleep 10
-                        STATUS=$(docker exec sonarqube_portfolio curl -s -u 9db3525e595688722b7c3bb54906a032: \
+                        STATUS=$(docker exec sonarqube_portfolio curl -s -u squ_eb2e95d52ee8b14ce391764f027dde95147d3137: \
                             "http://localhost:9000/api/qualitygates/project_status?projectKey=portfolio-v6" \
                             | grep -o '"status":"[^"]*"' | head -1 | cut -d'"' -f4)
                         echo "Quality Gate Status: $STATUS"
