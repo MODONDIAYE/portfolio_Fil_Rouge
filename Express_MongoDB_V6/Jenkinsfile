@@ -32,6 +32,7 @@ pipeline {
                     echo '=== ETAPE 3 : Tests Jest ==='
                     sh 'npm install'
                     sh 'npm run test:coverage || true'
+                    echo '=== Tests termines ==='
                 }
             }
         }
@@ -39,10 +40,14 @@ pipeline {
             steps {
                 dir("${PROJECT_DIR}") {
                     echo '=== ETAPE 4 : Analyse SonarQube ==='
-                    withSonarQubeEnv('SonarQube-Local') {
-                        def scannerHome = tool 'SonarScanner'
-                        sh "${scannerHome}/bin/sonar-scanner -Dsonar.projectKey=portfolio-v6 -Dsonar.sources=backend-expressJS,frontend-react/src -Dsonar.exclusions=**/node_modules/**,**/dist/**,**/coverage/** -Dsonar.javascript.lcov.reportPaths=backend-expressJS/coverage/lcov.info -Dsonar.sourceEncoding=UTF-8"
+                    // script{} est obligatoire pour utiliser def en Declarative Pipeline
+                    script {
+                        withSonarQubeEnv('SonarQube-Local') {
+                            def scannerHome = tool 'SonarScanner'
+                            sh "${scannerHome}/bin/sonar-scanner -Dsonar.projectKey=portfolio-v6 -Dsonar.sources=backend-expressJS,frontend-react/src -Dsonar.exclusions=**/node_modules/**,**/dist/**,**/coverage/** -Dsonar.javascript.lcov.reportPaths=backend-expressJS/coverage/lcov.info -Dsonar.sourceEncoding=UTF-8"
+                        }
                     }
+                    echo '=== Analyse SonarQube terminee ==='
                 }
             }
         }
@@ -52,6 +57,7 @@ pipeline {
                 timeout(time: 5, unit: 'MINUTES') {
                     waitForQualityGate abortPipeline: true
                 }
+                echo '=== Quality Gate : PASSED ==='
             }
         }
         stage('Docker Build') {
@@ -59,6 +65,7 @@ pipeline {
                 dir("${PROJECT_DIR}") {
                     echo '=== ETAPE 6 : Docker Build ==='
                     sh 'docker compose build'
+                    echo '=== Images construites ==='
                 }
             }
         }
@@ -76,6 +83,7 @@ pipeline {
             steps {
                 echo '=== ETAPE 8 : Health Check ==='
                 sh 'docker exec portfolio_backend wget --spider -q http://127.0.0.1:5000/api/health'
+                echo '=== Application operationnelle ==='
             }
         }
     }
