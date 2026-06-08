@@ -1,0 +1,132 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: prometheus-config
+  namespace: monitoring
+data:
+  prometheus.yml: |
+    global:
+      scrape_interval: 15s
+      evaluation_interval: 15s
+
+    rule_files:
+      - "/etc/prometheus/alert-rules.yml"
+
+    alerting:
+      alertmanagers:
+        - static_configs:
+            - targets: []
+
+    scrape_configs:
+      # Prometheus auto-monitoring
+      - job_name: 'prometheus'
+        static_configs:
+          - targets: ['localhost:9090']
+
+      # Backend Express.js (metriques applicatives)
+      - job_name: 'portfolio-backend'
+        metrics_path: /api/metrics
+        scrape_interval: 10s
+        kubernetes_sd_configs:
+          - role: endpoints
+            namespaces:
+              names:
+                - portfolio
+        relabel_configs:
+          - source_labels: [__meta_kubernetes_service_name]
+            regex: backend-service
+            action: keep
+          - source_labels: [__meta_kubernetes_namespace]
+            target_label: namespace
+          - source_labels: [__meta_kubernetes_pod_name]
+            target_label: pod
+
+      # Node Exporter (metriques systeme)
+      - job_name: 'node-exporter'
+        kubernetes_sd_configs:
+          - role: endpoints
+            namespaces:
+              names:
+                - monitoring
+        relabel_configs:
+          - source_labels: [__meta_kubernetes_service_name]
+            regex: node-exporter
+            action: keep
+
+      # Kube State Metrics
+      - job_name: 'kube-state-metrics'
+        kubernetes_sd_configs:
+          - role: endpoints
+            namespaces:
+              names:
+                - monitoring
+        relabel_configs:
+          - source_labels: [__meta_kubernetes_service_name]
+            regex: kube-state-metrics
+            action: keep
+
+      # MongoDB Exporter
+      - job_name: 'mongodb-exporter'
+        kubernetes_sd_configs:
+          - role: endpoints
+            namespaces:
+              names:
+                - monitoring
+        relabel_configs:
+          - source_labels: [__meta_kubernetes_service_name]
+            regex: mongodb-exporter
+            action: keep
+
+  alert-rules.yml: |
+    groups:
+      - name: portfolio-alerts
+        rules:
+          # Alerte si un pod est down depuis plus de 2 minutes
+          - alert: PodDown
+            expr: up{job="portfolio-backend"} == 0
+            for: 2m
+            labels:
+              severity: critical
+            annotations:
+              summary: "Pod backend down"
+              description: "Le pod {{ $labels.pod }} est injoignable depuis 2 minutes."
+
+          # Alerte si le temps de reponse depasse 2s
+          - alert: HighResponseTime
+            expr: histogram_quantile(0.95, rate(http_request_duration_seconds_bucket{job="portfolio-backend"}[5m])) > 2
+            for: 3m
+            labels:
+              severity: warning
+            annotations:
+              summary: "Temps de reponse eleve"
+              description: "Le P95 du temps de reponse depasse 2s depuis 3 minutes."
+
+          # Alerte si taux d'erreur > 5%
+          - alert: HighErrorRate
+            expr: rate(http_requests_total{status=~"5.."}[5m]) / rate(http_requests_total[5m]) > 0.05
+            for: 3m
+            labels:
+              severity: critical
+            annotations:
+              summary: "Taux d'erreur HTTP eleve"
+              description: "Plus de 5% des requetes retournent une erreur 5xx."
+
+          # Alerte si CPU > 80%
+          - alert: HighCPUUsage
+            expr: rate(process_cpu_seconds_total{job="portfolio-backend"}[5m]) > 0.8
+            for: 5m
+            labels:
+              severity: warning
+            annotations:
+              summary: "Utilisation CPU elevee"
+              description: "Le CPU du backend depasse 80% depuis 5 minutes."
+
+          # Alerte si memoire > 200Mi
+          - alert: HighMemoryUsage
+            expr: process_resident_memory_bytes{job="portfolio-backend"} > 200 * 1024 * 1024
+            for: 5m
+            labels:
+              severity: warning
+            annotations:
+              summary: "Memoire elevee"
+              description: "Le backend utilise plus de 200Mi de RAM."
