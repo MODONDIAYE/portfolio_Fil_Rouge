@@ -1,4 +1,3 @@
-hcl
 # terraform/aws-vpc-ec2/outputs.tf
 
 output "vpc_id" {

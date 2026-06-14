@@ -1,4 +1,3 @@
-hcl
 # terraform/aws-vpc-ec2/main.tf
 
 # ── Récupérer l'AMI Amazon Linux 2 la plus récente ──────────

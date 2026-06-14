@@ -1,4 +1,3 @@
-hcl
 # terraform/aws-vpc-ec2/variables.tf
 
 variable "aws_region" {
