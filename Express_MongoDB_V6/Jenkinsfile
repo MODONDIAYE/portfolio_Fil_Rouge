@@ -5,6 +5,8 @@ pipeline {
         BACKEND_IMAGE  = 'modoundiaye/portfolio-backend'
         FRONTEND_IMAGE = 'modoundiaye/portfolio-frontend'
         SONAR_HOST_URL = 'http://sonarqube:9000'
+        IMAGE_TAG      = "${env.BUILD_NUMBER}"
+        K8S_NAMESPACE  = 'portfolio'
     }
     triggers { githubPush() }
     options {
@@ -13,6 +15,8 @@ pipeline {
         disableConcurrentBuilds()
     }
     stages {
+
+        // ── ETAPE 1 : Checkout ────────────────────────────────────────
         stage('Checkout') {
             steps {
                 echo '=== ETAPE 1 : Checkout ==='
@@ -20,6 +24,8 @@ pipeline {
                 echo "=== Commit : ${env.GIT_COMMIT?.take(7)} ==="
             }
         }
+
+        // ── ETAPE 2 : Verification ────────────────────────────────────
         stage('Verification') {
             steps {
                 echo '=== ETAPE 2 : Verification Docker ==='
@@ -28,21 +34,28 @@ pipeline {
                 sh 'docker ps --format "table {{.Names}}\\t{{.Status}}"'
             }
         }
+
+        // ── ETAPE 3 : Docker Build ────────────────────────────────────
         stage('Docker Build') {
             steps {
                 dir("${PROJECT_DIR}") {
                     echo '=== ETAPE 3 : Docker Build ==='
-                    sh 'docker compose -f docker-compose.yml -p portfolio build'
-                    echo '=== Images construites ==='
+                    sh """
+                        docker build -t ${BACKEND_IMAGE}:${IMAGE_TAG} -t ${BACKEND_IMAGE}:latest ./backend-expressJS
+                        docker build -t ${FRONTEND_IMAGE}:${IMAGE_TAG} -t ${FRONTEND_IMAGE}:latest ./frontend-react
+                    """
+                    echo "=== Images construites : tags :${IMAGE_TAG} et :latest ==="
                 }
             }
         }
+
+        // ── ETAPE 4 : Deploiement Docker Compose ─────────────────────
         stage('Deploiement') {
             steps {
                 dir("${PROJECT_DIR}") {
                     echo '=== ETAPE 4 : Deploiement ==='
                     sh '''
-                        echo "--- Arret de tous les conteneurs portfolio ---"
+                        echo "--- Arret des conteneurs portfolio ---"
                         docker stop portfolio_mongodb portfolio_backend portfolio_frontend 2>/dev/null || true
                         docker rm -f portfolio_mongodb portfolio_backend portfolio_frontend 2>/dev/null || true
                         sleep 3
@@ -55,6 +68,8 @@ pipeline {
                 }
             }
         }
+
+        // ── ETAPE 5 : Health Check ────────────────────────────────────
         stage('Health Check') {
             steps {
                 echo '=== ETAPE 5 : Health Check ==='
@@ -62,13 +77,17 @@ pipeline {
                 echo '=== Application operationnelle ==='
             }
         }
+
+        // ── ETAPE 6 : Tests ───────────────────────────────────────────
         stage('Tests') {
             steps {
-                echo '=== ETAPE 6 : Tests Jest (via docker exec) ==='
+                echo '=== ETAPE 6 : Tests Jest ==='
                 sh 'docker exec portfolio_backend sh -c "cd /app && npm run test:coverage"'
                 echo '=== Tests termines ==='
             }
         }
+
+        // ── ETAPE 7a : Demarrage SonarQube ───────────────────────────
         stage('Start SonarQube') {
             steps {
                 dir("${PROJECT_DIR}") {
@@ -77,7 +96,10 @@ pipeline {
                     sh '''
                         echo "Attente SonarQube..."
                         for i in $(seq 1 30); do
-                            if docker exec sonarqube_portfolio curl -s http://localhost:9000/api/system/status | grep -q '"status":"UP"'; then
+                            STATUS=$(docker exec sonarqube_portfolio \
+                                curl -s http://localhost:9000/api/system/status \
+                                | grep -o '"status":"[^"]*"' | cut -d'"' -f4)
+                            if [ "$STATUS" = "UP" ]; then
                                 echo "SonarQube pret"
                                 break
                             fi
@@ -87,16 +109,22 @@ pipeline {
                 }
             }
         }
+
+        // ── ETAPE 7b : Analyse SonarQube ─────────────────────────────
         stage('SonarQube Analysis') {
             steps {
                 dir("${PROJECT_DIR}") {
                     echo '=== ETAPE 7b : Analyse SonarQube ==='
                     sh '''
-                        SONAR_NETWORK=$(docker inspect sonarqube_portfolio --format '{{range $k,$v := .NetworkSettings.Networks}}{{$k}}{{end}}')
+                        SONAR_NETWORK=$(docker inspect sonarqube_portfolio \
+                            --format "{{range $k,$v := .NetworkSettings.Networks}}{{$k}}{{end}}")
                         echo "SonarQube network: $SONAR_NETWORK"
-                        JENKINS_VOLUME=$(docker inspect jenkins_portfolio --format '{{range .Mounts}}{{if eq .Destination "/var/jenkins_home"}}{{.Source}}{{end}}{{end}}')
+
+                        JENKINS_VOLUME=$(docker inspect jenkins_portfolio \
+                            --format "{{range .Mounts}}{{if eq .Destination \\"/var/jenkins_home\\"}}{{.Source}}{{end}}{{end}}")
                         HOST_PATH="${JENKINS_VOLUME}/workspace/portfolio-v6-pipelin/Express_MongoDB_V6"
                         echo "Host path: $HOST_PATH"
+
                         docker run --rm \
                             --network "$SONAR_NETWORK" \
                             -v "${HOST_PATH}:/usr/src" \
@@ -115,13 +143,16 @@ pipeline {
                 }
             }
         }
+
+        // ── ETAPE 8 : Quality Gate ────────────────────────────────────
         stage('Quality Gate') {
             steps {
                 echo '=== ETAPE 8 : Quality Gate ==='
                 timeout(time: 2, unit: 'MINUTES') {
                     sh '''
                         sleep 10
-                        STATUS=$(docker exec sonarqube_portfolio curl -s -u squ_eb2e95d52ee8b14ce391764f027dde95147d3137: \
+                        STATUS=$(docker exec sonarqube_portfolio \
+                            curl -s -u squ_eb2e95d52ee8b14ce391764f027dde95147d3137: \
                             "http://localhost:9000/api/qualitygates/project_status?projectKey=portfolio-v6" \
                             | grep -o '"status":"[^"]*"' | head -1 | cut -d'"' -f4)
                         echo "Quality Gate Status: $STATUS"
@@ -134,10 +165,112 @@ pipeline {
                 echo '=== Quality Gate : PASSED ==='
             }
         }
+
+        // ── ETAPE 9 : Docker Push ─────────────────────────────────────
+        stage('Docker Push') {
+            steps {
+                echo '=== ETAPE 9 : Push images Docker Hub ==='
+                withCredentials([usernamePassword(
+                    credentialsId: 'dockerhub-credentials',
+                    usernameVariable: 'DOCKER_USER',
+                    passwordVariable: 'DOCKER_PASS'
+                )]) {
+                    sh """
+                        echo "\$DOCKER_PASS" | docker login -u "\$DOCKER_USER" --password-stdin
+                        docker push ${BACKEND_IMAGE}:${IMAGE_TAG}
+                        docker push ${BACKEND_IMAGE}:latest
+                        docker push ${FRONTEND_IMAGE}:${IMAGE_TAG}
+                        docker push ${FRONTEND_IMAGE}:latest
+                        docker logout
+                    """
+                }
+                echo "=== Images poussees : tag :${IMAGE_TAG} et :latest ==="
+            }
+        }
+
+        // ── ETAPE 10 : Deploiement Kubernetes ────────────────────────
+        stage('Deploy to Kubernetes') {
+            steps {
+                echo '=== ETAPE 10 : Deploiement Kubernetes ==='
+                sh """
+                    kubectl set image deployment/backend-deployment \
+                        backend=${BACKEND_IMAGE}:${IMAGE_TAG} \
+                        -n ${K8S_NAMESPACE}
+
+                    kubectl set image deployment/frontend-deployment \
+                        frontend=${FRONTEND_IMAGE}:${IMAGE_TAG} \
+                        -n ${K8S_NAMESPACE}
+
+                    kubectl rollout status deployment/backend-deployment \
+                        -n ${K8S_NAMESPACE} --timeout=120s
+
+                    kubectl rollout status deployment/frontend-deployment \
+                        -n ${K8S_NAMESPACE} --timeout=120s
+
+                    kubectl get pods -n ${K8S_NAMESPACE}
+                """
+                echo '=== Deploiement Kubernetes termine ==='
+            }
+        }
+
+        // ── ETAPE 11 : Deploy with Terraform ─────────────────────────
+        stage('Deploy with Terraform') {
+            steps {
+                echo '=== ETAPE 11 : Deploiement Terraform (K8s local) ==='
+                dir("${PROJECT_DIR}/terraform/k8s-local") {
+                    sh 'terraform init -input=false'
+                    sh """
+                        terraform plan \
+                            -var="backend_image=${BACKEND_IMAGE}:${IMAGE_TAG}" \
+                            -var="frontend_image=${FRONTEND_IMAGE}:${IMAGE_TAG}" \
+                            -input=false
+                    """
+                    sh """
+                        terraform apply -auto-approve \
+                            -var="backend_image=${BACKEND_IMAGE}:${IMAGE_TAG}" \
+                            -var="frontend_image=${FRONTEND_IMAGE}:${IMAGE_TAG}" \
+                            -input=false
+                    """
+                }
+                echo '=== Deploiement Terraform termine ==='
+            }
+        }
+
+        // ── ETAPE 12 : K8s Health Check ───────────────────────────────
+        stage('K8s Health Check') {
+            steps {
+                echo '=== ETAPE 12 : Verification sante K8s ==='
+                sh """
+                    NOT_READY=\$(kubectl get pods -n ${K8S_NAMESPACE} \
+                        --field-selector=status.phase!=Running \
+                        --no-headers 2>/dev/null | grep -v Completed | wc -l)
+
+                    if [ "\$NOT_READY" -gt "0" ]; then
+                        echo "ERREUR : \$NOT_READY pod(s) ne sont pas Running"
+                        kubectl get pods -n ${K8S_NAMESPACE}
+                        exit 1
+                    fi
+
+                    echo "Tous les pods sont Running"
+                    kubectl get pods -n ${K8S_NAMESPACE}
+                """
+            }
+        }
     }
+
     post {
-        success { echo '=== PIPELINE REUSSI ===' }
-        failure { echo '=== PIPELINE ECHOUE ===' }
+        success {
+            echo '=== PIPELINE REUSSI : code teste, analyse et deploye sur K8s ==='
+        }
+        failure {
+            echo '=== PIPELINE ECHOUE ==='
+            sh """
+                echo "--- Tentative de rollback K8s ---"
+                kubectl rollout undo deployment/backend-deployment -n ${K8S_NAMESPACE} || true
+                kubectl rollout undo deployment/frontend-deployment -n ${K8S_NAMESPACE} || true
+                kubectl get pods -n ${K8S_NAMESPACE}
+            """
+        }
         always {
             echo '=== Fin du pipeline ==='
         }
