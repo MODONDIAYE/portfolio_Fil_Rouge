@@ -1,0 +1,36 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+rule_files:
+  - "alert-rules.yml"
+
+scrape_configs:
+  # Prometheus self-monitoring
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+
+  # Backend Express.js — metriques applicatives
+  - job_name: 'portfolio-backend'
+    metrics_path: /api/metrics
+    scrape_interval: 10s
+    static_configs:
+      - targets: ['portfolio_backend:5000']
+        labels:
+          app: 'backend'
+          environment: 'production'
+
+  # Node Exporter — metriques systeme (CPU, RAM, Disk)
+  - job_name: 'node-exporter'
+    static_configs:
+      - targets: ['node-exporter:9100']
+        labels:
+          instance: 'docker-host'
+
+  # MongoDB Exporter — metriques base de donnees
+  - job_name: 'mongodb-exporter'
+    static_configs:
+      - targets: ['mongodb-exporter:9216']
+        labels:
+          app: 'mongodb'
