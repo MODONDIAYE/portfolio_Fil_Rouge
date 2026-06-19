@@ -1,0 +1,47 @@
+groups:
+  - name: portfolio-alerts
+    rules:
+      - alert: BackendDown
+        expr: up{job="portfolio-backend"} == 0
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Backend Express.js DOWN"
+          description: "Le backend portfolio est injoignable depuis 2 minutes."
+
+      - alert: HighResponseTime
+        expr: histogram_quantile(0.95, rate(http_request_duration_seconds_bucket{job="portfolio-backend"}[5m])) > 2
+        for: 3m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Temps de reponse P95 > 2s"
+          description: "Le percentile 95 du temps de reponse depasse 2 secondes."
+
+      - alert: HighErrorRate
+        expr: rate(http_requests_total{status=~"5.."}[5m]) / rate(http_requests_total[5m]) > 0.05
+        for: 3m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Taux d'erreur HTTP > 5%"
+          description: "Plus de 5% des requetes retournent une erreur 5xx."
+
+      - alert: HighMemoryUsage
+        expr: process_resident_memory_bytes{job="portfolio-backend"} > 200 * 1024 * 1024
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Memoire backend > 200Mi"
+          description: "Le backend utilise plus de 200Mi de RAM depuis 5 minutes."
+
+      - alert: MongoDBDown
+        expr: up{job="mongodb-exporter"} == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "MongoDB DOWN"
+          description: "MongoDB est injoignable depuis 1 minute."
